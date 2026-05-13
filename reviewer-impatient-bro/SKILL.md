@@ -1,6 +1,6 @@
 ---
 name: drama-reviewer-impatient-bro
-description: Review short drama scripts, titles, or content from the perspective of a fast-paced, swipe-driven audience member (TikTok/ReelShort users). Focuses on pacing, hooks, emotional payoff, and instant engagement.
+description: Use ONLY when the user explicitly requests the "Impatient Bro" (急躁哥) perspective alone. For general reviews, use drama-reviewer-combo instead.
 version: 1.0.0
 author: husw725
 license: MIT

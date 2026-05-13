@@ -1,6 +1,6 @@
 ---
 name: drama-reviewer-combo
-description: Run all three reviewer personas (Impatient Bro, Logic Master, Visual Expert) simultaneously for a comprehensive short drama review. Supports international markets: US/EU, Japan/Korea, China, Southeast Asia.
+description: DEFAULT short drama review skill. Use when the user asks for a review, critique, or feedback on drama titles, scripts, or episodes without specifying a single perspective. Runs all three personas (急躁哥, 逻辑控, 视听专家) simultaneously. Supports international markets: US/EU, Japan/Korea, China, Southeast Asia.
 version: 1.0.0
 author: husw725
 license: MIT

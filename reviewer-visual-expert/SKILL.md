@@ -1,6 +1,6 @@
 ---
 name: drama-reviewer-visual-expert
-description: Review short drama scripts, titles, or content from the perspective of a seasoned producer. Focuses on cinematography, visual branding, IP potential, commercial viability, and cross-platform adaptation.
+description: Use ONLY when the user explicitly requests the "Visual Expert" (视听专家) perspective alone. For general reviews, use drama-reviewer-combo instead.
 version: 1.0.0
 author: husw725
 license: MIT

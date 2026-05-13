@@ -1,6 +1,6 @@
 ---
 name: drama-reviewer-logic-master
-description: Review short drama scripts, titles, or content from the perspective of a discerning, analytical urban professional. Focuses on genre positioning, information density, SEO, platform fit, and user segmentation.
+description: Use ONLY when the user explicitly requests the "Logic Master" (逻辑控) perspective alone. For general reviews, use drama-reviewer-combo instead.
 version: 1.0.0
 author: husw725
 license: MIT
