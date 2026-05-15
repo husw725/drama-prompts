@@ -1,0 +1,649 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>AI 短剧制作工作台</title>
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+body{font-family:-apple-system,'Segoe UI',Roboto,sans-serif;background:#0a0e27;color:#e0e0e0;min-height:100vh;overflow:hidden}
+:root{--accent:#ff4da6;--accent2:#a855f7;--success:#22c55e;--warn:#f59e0b;--border:#1e293b;--dim:#94a3b8}
+
+/* APP LAYOUT */
+.app{display:flex;flex-direction:column;height:100vh;height:100dvh}
+.header{display:flex;align-items:center;justify-content:space-between;padding:10px 16px;background:#0d1137;border-bottom:1px solid var(--border);flex-shrink:0}
+.header h1{font-size:16px;font-weight:700;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.header h1 span{background:linear-gradient(135deg,var(--accent),var(--accent2));-webkit-background-clip:text;-webkit-text-fill-color:transparent}
+.header-sub{font-size:11px;color:var(--dim);margin-left:8px}
+.header-controls{display:flex;gap:8px;align-items:center;flex-shrink:0}
+.btn-sm{background:#334155;color:#e0e0e0;border:none;padding:3px 8px;border-radius:4px;cursor:pointer;font-size:11px}
+.btn-sm:hover{background:#475569}
+
+/* TABS */
+.tabs{display:flex;gap:0;padding:0 12px;background:#0d1137;border-bottom:1px solid var(--border);overflow-x:auto;flex-shrink:0;-webkit-overflow-scrolling:touch}
+.tab{padding:8px 12px;cursor:pointer;font-size:12px;color:var(--dim);border-bottom:2px solid transparent;white-space:nowrap;flex-shrink:0}
+.tab:hover{color:#e0e0e0}
+.tab.active{color:var(--accent);border-bottom-color:var(--accent);font-weight:600}
+
+/* MAIN */
+.main{display:flex;flex:1;overflow:hidden}
+.sidebar{width:180px;background:#0d1137;border-right:1px solid var(--border);overflow-y:auto;flex-shrink:0;padding:8px 0}
+.ep-item{padding:7px 14px;cursor:pointer;font-size:12px;display:flex;align-items:center;gap:8px}
+.ep-item:hover{background:#1a1f4e}
+.ep-item.active{background:#1e295e;color:var(--accent)}
+.ep-dot{width:8px;height:8px;border-radius:50%;flex-shrink:0}
+.content{flex:1;overflow-y:auto;padding:16px;-webkit-overflow-scrolling:touch}
+
+/* PANELS */
+.tab-panel{display:none}.tab-panel.active{display:block}
+.card{background:#111840;border:1px solid var(--border);border-radius:8px;padding:14px;margin-bottom:10px}
+.stat-box{background:#111840;border:1px solid var(--border);border-radius:8px;padding:14px;text-align:center}
+.stat-box .num{font-size:24px;font-weight:700;color:var(--accent)}
+.stat-box .label{font-size:11px;color:var(--dim);margin-top:2px}
+
+/* TABLE */
+.tbl-wrap{overflow-x:auto;-webkit-overflow-scrolling:touch}
+table{width:100%;border-collapse:collapse;font-size:12px}
+th{text-align:left;padding:7px 8px;background:#111840;border-bottom:2px solid var(--border);color:var(--dim);font-weight:600;position:sticky;top:0;z-index:1;white-space:nowrap}
+td{padding:5px 8px;border-bottom:1px solid var(--border);vertical-align:top}
+tr:hover td{background:#1a1f4e}
+
+/* EDITABLE */
+[contenteditable]{outline:none;border-radius:3px;padding:2px 4px;cursor:text}
+[contenteditable]:focus{background:#1e295e}
+.cell-edited{background:#3d2e00!important;border:1px solid var(--warn)}
+
+/* SELECT */
+select{background:#1a1f4e;color:#e0e0e0;border:1px solid var(--border);border-radius:4px;padding:3px 6px;font-size:11px}
+
+/* SECTIONS */
+.section{margin-bottom:20px}
+.section h2{font-size:15px;margin-bottom:10px;color:var(--accent2)}
+.section h3{font-size:13px;margin:14px 0 8px;color:var(--accent)}
+
+/* PROMPT CARD */
+.prompt-card{background:#111840;border:1px solid var(--border);border-radius:8px;padding:10px;margin-bottom:8px}
+.prompt-header{font-size:11px;color:var(--dim);margin-bottom:4px;display:flex;align-items:center;gap:8px}
+.prompt-body{font-size:12px;line-height:1.6;white-space:pre-wrap;margin:6px 0}
+.prompt-actions{margin-top:6px;display:flex;gap:6px;flex-wrap:wrap}
+
+/* ATTACHMENTS */
+.attach-grid{display:flex;flex-wrap:wrap;gap:6px;margin-top:6px}
+.attach-item{position:relative;border-radius:6px;overflow:hidden;border:1px solid var(--border);cursor:pointer;flex-shrink:0}
+.attach-item img{display:block;width:140px;height:80px;object-fit:cover}
+.attach-item video{display:block;width:140px;height:80px;object-fit:cover}
+.attach-badge{position:absolute;top:3px;right:3px;background:rgba(0,0,0,.7);color:#fff;font-size:9px;padding:1px 5px;border-radius:3px}
+.attach-text{display:inline-block;background:#1a1f4e;color:var(--dim);font-size:11px;padding:3px 8px;border-radius:4px;margin:2px;max-width:200px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;word-break:break-all}
+
+/* MODAL */
+.modal-overlay{position:fixed;top:0;left:0;right:0;bottom:0;background:rgba(0,0,0,.92);z-index:1000;display:flex;align-items:center;justify-content:center}
+.modal-close{position:fixed;top:12px;right:12px;background:var(--accent);color:#fff;border:none;padding:6px 14px;border-radius:6px;cursor:pointer;font-size:14px;z-index:1001}
+.modal-overlay img,.modal-overlay video{max-width:96vw;max-height:94vh}
+
+/* MOBILE */
+@media(max-width:768px){
+  .sidebar{display:none}
+  .header h1{font-size:14px}
+  .header-sub{display:none}
+  .tab{padding:7px 9px;font-size:11px}
+  .content{padding:12px}
+  .stat-box .num{font-size:20px}
+  .attach-item img,.attach-item video{width:100px;height:60px}
+}
+
+/* STATUS BAR */
+.status-row{display:flex;align-items:center;gap:8px;margin:4px 0;font-size:11px}
+.status-bar{flex:1;height:16px;background:#111840;border-radius:3px;overflow:hidden}
+.status-fill{height:100%;border-radius:3px;transition:width .3s}
+</style>
+</head>
+<body>
+
+<div class="app">
+  <div class="header">
+    <h1 id="headerTitle"></h1>
+    <div class="header-controls">
+      <select id="epSelect"></select>
+      <select id="globalStatus"></select>
+      <button class="btn-sm" id="btnLoadJSON" onclick="doLoadJSON()" style="background:#6366f1;color:#fff">📂 加载 JSON</button>
+      <button class="btn-sm" onclick="doSaveJSON()" style="background:var(--success);color:#fff">💾 保存 JSON</button>
+    </div>
+    <input type="file" id="fileInputJSON" accept=".json" style="display:none" onchange="handleFileLoad(this)">
+  </div>
+  <div class="tabs" id="tabBar"></div>
+  <div class="main">
+    <div class="sidebar" id="sidebar"></div>
+    <div class="content">
+      <div class="tab-panel active" id="panel-dashboard"></div>
+      <div class="tab-panel" id="panel-storyboard"></div>
+      <div class="tab-panel" id="panel-script"></div>
+      <div class="tab-panel" id="panel-characters"></div>
+      <div class="tab-panel" id="panel-scenes"></div>
+      <div class="tab-panel" id="panel-props"></div>
+      <div class="tab-panel" id="panel-image-prompts"></div>
+      <div class="tab-panel" id="panel-video-prompts"></div>
+      <div class="tab-panel" id="panel-assets"></div>
+    </div>
+  </div>
+</div>
+
+<div class="modal-overlay" id="imgModal" style="display:none" onclick="if(event.target===this)closeModal()">
+  <button class="modal-close" onclick="closeModal()">✕</button>
+  <div id="modalContent"></div>
+</div>
+
+<!--DATA_CHUNKS-->
+
+<script>
+var D = null, curEp = 1, edits = {}, statuses = {};
+
+(function(){
+  try{
+    var chunks = document.querySelectorAll('script.__data_chunk__');
+    var jsonStr = '';
+    for(var i = 0; i < chunks.length; i++) jsonStr += chunks[i].textContent;
+    D = JSON.parse(jsonStr);
+  }catch(e){ console.error('Chunk data load failed:', e); }
+  // Fallback: try fetch for HTTP server mode
+  if(!D){
+    var xhr = new XMLHttpRequest();
+    xhr.open('GET', 'project_data.json', false);
+    try{
+      xhr.send();
+      if(xhr.status === 200) D = JSON.parse(xhr.responseText);
+    }catch(e2){ console.error('Fetch fallback failed:', e2); }
+  }
+  if(!D){
+    document.querySelector('.content').innerHTML = '<div class="section"><h2 style="color:var(--warn)">⚠️ 数据加载失败</h2><p>请通过 HTTP 服务打开此页面，或检查 project_data.json 是否在同目录下。</p><p style="margin-top:8px">启动方式: <code style="background:#1a1f4e;padding:2px 6px;border-radius:3px">python3 -m http.server 8767</code></p></div>';
+  }
+})();
+
+var TABS = [
+  {id:'dashboard',label:'📊 仪表盘'},{id:'storyboard',label:'🎬 分镜'},{id:'script',label:'📝 剧本'},
+  {id:'characters',label:'👤 角色'},{id:'scenes',label:'🏰 场景'},{id:'props',label:'🧰 道具'},
+  {id:'image-prompts',label:'🖼️ 图片Prompt'},{id:'video-prompts',label:'🎞️ 视频Prompt'},{id:'assets',label:'📁 素材库'}
+];
+var STATUSES = ['草稿','分镜完成','生图中','生图完成','生视频中','成片完成'];
+var STATUS_C = {'草稿':'#94a3b8','分镜完成':'#64748b','生图中':'#f59e0b','生图完成':'#22c55e','生视频中':'#a855f7','成片完成':'#ff4da6'};
+
+// PERSISTENCE
+function loadP(){try{var e=localStorage.getItem('wb_edits');if(e)edits=JSON.parse(e)}catch(x){}try{var s=localStorage.getItem('wb_statuses');if(s)statuses=JSON.parse(s)}catch(x){}}
+function saveE(){localStorage.setItem('wb_edits',JSON.stringify(edits))}
+function saveS(){localStorage.setItem('wb_statuses',JSON.stringify(statuses))}
+
+// HELPERS
+function esc(s){if(s==null)return'';var d=document.createElement('span');d.textContent=String(s);return d.innerHTML}
+function findEp(n){for(var i=0;i<D.episodes.length;i++)if(D.episodes[i].number===n)return D.episodes[i];return null}
+
+// CELL EDIT — auto-save to localStorage
+function saveCell(el,key){
+  edits[key]=el.textContent;
+  saveE();
+  el.classList.remove('cell-edited');
+}
+
+// GET EDITED VALUE — always return edit if exists, else original
+function gVal(key,def){return edits[key]!==undefined?edits[key]:def}
+function hasEdit(key){return edits[key]!==undefined}
+
+// TABS
+function buildTabs(){
+  var bar=document.getElementById('tabBar');
+  bar.innerHTML=TABS.map(function(t){return'<div class="tab'+(t.id===TABS[0].id?' active':'')+'" data-tab="'+t.id+'">'+t.label+'</div>'}).join('');
+  bar.addEventListener('click',function(e){
+    var tab=e.target.closest('.tab');if(!tab)return;
+    bar.querySelectorAll('.tab').forEach(function(t){t.classList.remove('active')});
+    document.querySelectorAll('.tab-panel').forEach(function(p){p.classList.remove('active')});
+    tab.classList.add('active');
+    document.getElementById('panel-'+tab.dataset.tab).classList.add('active');
+    renderPanel(tab.dataset.tab);
+  });
+}
+function curTabId(){var a=document.querySelector('.tab.active');return a?a.dataset.tab:TABS[0].id}
+function renderPanel(id){
+  var R={'dashboard':rDash,'storyboard':rStoryboard,'script':rScript,'characters':rChars,'scenes':rScenes,'props':rProps,'image-prompts':rImgPrompts,'video-prompts':rVidPrompts,'assets':rAssets};
+  if(R[id])R[id]();
+}
+
+// EP SELECT
+function buildEpSelect(){
+  var sel=document.getElementById('epSelect');
+  D.episodes.forEach(function(ep){var o=document.createElement('option');o.value=ep.number;o.textContent=(ep.id||ep.number)+': '+(ep.title||'');sel.appendChild(o)});
+  sel.value=1;sel.addEventListener('change',function(){selectEp(parseInt(sel.value))});
+}
+function selectEp(num){
+  curEp=num;
+  document.getElementById('epSelect').value=num;
+  document.querySelectorAll('.ep-item').forEach(function(el){el.classList.toggle('active',parseInt(el.dataset.ep)===num)});
+  var ss=document.getElementById('globalStatus');ss.innerHTML='';
+  STATUSES.forEach(function(s){var o=document.createElement('option');o.value=s;o.textContent=s;var epId='EP-'+String(num).padStart(2,'0');o.selected=(statuses[epId]||'草稿')===s;ss.appendChild(o)});
+  ss.onchange=function(){statuses['EP-'+String(curEp).padStart(2,'0')]=ss.value;saveS();renderSidebar();rDash()};
+  renderPanel(curTabId());
+}
+
+// SIDEBAR
+function renderSidebar(){
+  var sb=document.getElementById('sidebar');
+  sb.innerHTML=D.episodes.map(function(ep){
+    var st=statuses[ep.id]||'草稿';
+    var c=STATUS_C[st]||STATUS_C['草稿'];
+    return'<div class="ep-item'+(ep.number===curEp?' active':'')+'" data-ep="'+ep.number+'" onclick="selectEp('+ep.number+')"><span class="ep-dot" style="background:'+c+'"></span><span>'+esc(ep.id)+'</span></div>';
+  }).join('');
+}
+
+// DASHBOARD (read-only stats)
+function rDash(){
+  var el=document.getElementById('panel-dashboard');
+  var eps=D.episodes,te=eps.length;
+  var ti=0,tv=0,ts=0;
+  eps.forEach(function(e){var p=e.prompts||{};ti+=(p.imagePrompts||[]).length;tv+=(p.videoPrompts||[]).length;ts+=(e.review&&e.review.score)?e.review.score:0});
+  var as=te?(ts/te).toFixed(1):'0';
+  var sc=(D.manifest&&D.manifest.scenes)?D.manifest.scenes.length:0;
+  var pc=(D.manifest&&D.manifest.props)?D.manifest.props.length:0;
+  var cc=(D.characters||[]).length;
+  var html='<div class="section">';
+  html+='<div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(120px,1fr));gap:10px;margin-bottom:16px">';
+  html+=sBox(te,'总集数')+sBox(ti,'图片Prompt')+sBox(tv,'视频Prompt')+sBox(as,'平均审核分')+sBox(cc,'角色')+sBox(sc,'场景')+sBox(pc,'道具');
+  html+='</div>';
+  var cnt={};eps.forEach(function(e){var s=statuses[e.id]||'草稿';cnt[s]=(cnt[s]||0)+1});
+  html+='<h3>制作进度</h3>';
+  STATUSES.forEach(function(s){var c=cnt[s]||0;var p=te?(c/te*100):0;
+    html+='<div class="status-row"><span style="width:70px;color:var(--dim)">'+s+'</span><div class="status-bar"><div class="status-fill" style="width:'+p+'%;background:'+(STATUS_C[s]||'#ff4da6')+'"></div></div><span style="width:24px;text-align:right">'+c+'</span></div>';
+  });
+  html+='<h3>各集概览</h3><div class="tbl-wrap"><table><thead><tr><th>集</th><th>标题</th><th>镜头</th><th>时长</th><th>审核</th><th>图片</th><th>视频</th></tr></thead><tbody>';
+  eps.forEach(function(ep){
+    var score=(ep.review&&ep.review.score)?ep.review.score:'-';
+    var ic=((ep.prompts||{}).imagePrompts||[]).length;
+    var vc=((ep.prompts||{}).videoPrompts||[]).length;
+    html+='<tr><td>'+esc(ep.id)+'</td><td>'+esc(ep.title)+'</td><td>'+(ep.shot_count||'-')+'</td><td>'+(ep.duration||'-')+'</td><td>'+score+'</td><td>'+ic+'</td><td>'+vc+'</td></tr>';
+  });
+  html+='</tbody></table></div></div>';
+  el.innerHTML=html;
+}
+function sBox(n,l){return'<div class="stat-box"><div class="num">'+n+'</div><div class="label">'+l+'</div></div>'}
+
+// STORYBOARD — ALL columns editable
+function rStoryboard(){
+  var el=document.getElementById('panel-storyboard');
+  var ep=findEp(curEp);
+  if(!ep){el.innerHTML='<div class="section"><p>无数据</p></div>';return}
+  var shots=(ep.storyboard&&ep.storyboard.shots)?ep.storyboard.shots:[];
+  if(!shots.length){el.innerHTML='<div class="section"><h2>'+esc(ep.id)+' — '+esc(ep.title)+'</h2><p>暂无分镜数据</p></div>';return}
+  var keys=Object.keys(shots[0]);
+  var html='<div class="section"><h2>'+esc(ep.id)+' — '+esc(ep.title)+' ('+(ep.shot_count||'-')+' shots, '+(ep.duration||'-')+' )</h2>';
+  html+='<div class="tbl-wrap"><table><thead><tr>';
+  keys.forEach(function(k){html+='<th>'+k+'</th>'});
+  html+='</tr></thead><tbody>';
+  shots.forEach(function(shot,si){
+    html+='<tr>';
+    keys.forEach(function(k){
+      var val=shot[k]||'';
+      var key=ep.id+'_sb_'+si+'_'+k;
+      var dv=gVal(key,val);
+      html+='<td contenteditable="true" onblur="saveCell(this,\''+key+'\')" onfocus="this.classList.add(\'cell-edited\')">'+esc(dv)+'</td>';
+    });
+    html+='</tr>';
+  });
+  html+='</tbody></table></div>';
+  if(ep.storyboard&&ep.storyboard.attachments&&ep.storyboard.attachments.length){
+    html+='<h3>分镜附件</h3><div class="attach-grid">'+renderAttachments(ep.storyboard.attachments)+'</div>';
+  }
+  if(ep.review){
+    html+='<h3>审核详情 (Score: '+(ep.review.score||0)+'/100)</h3>';
+    if(ep.review.criteria&&ep.review.criteria.length){
+      html+='<div class="tbl-wrap"><table><thead><tr><th>维度</th><th>得分</th><th>通过</th></tr></thead><tbody>';
+      ep.review.criteria.forEach(function(c){html+='<tr><td>'+esc(c.name)+'</td><td>'+c.score+'/'+c.max_score+'</td><td>'+(c.pass?'\u2705':'\u274c')+'</td></tr>'});
+      html+='</tbody></table></div>';
+    }
+  }
+  html+='</div>';el.innerHTML=html;
+}
+
+// SCRIPT — editable
+function rScript(){
+  var el=document.getElementById('panel-script');
+  var ep=findEp(curEp);
+  var html='<div class="section"><h2>'+(ep?esc(ep.id)+' — '+esc(ep.title):'')+'</h2>';
+  if(ep){
+    var key=ep.id+'_script';
+    var md=gVal(key,ep.script||'');
+    md=md.replace(/^### (.+)$/gm,'<h4 style="color:var(--accent);margin:12px 0 6px">$1</h4>');
+    md=md.replace(/^## (.+)$/gm,'<h3 style="color:var(--accent2);margin:16px 0 8px">$1</h3>');
+    md=md.replace(/^# (.+)$/gm,'<h2 style="color:var(--accent);margin:16px 0 8px">$1</h2>');
+    md=md.replace(/^\|(.+)\|$/gm,function(match,content){
+      var cells=content.split('|').map(function(c){return c.trim()});
+      if(cells.every(function(c){return /^[-:]+$/.test(c)}))return '<!--sep-->';
+      return '<tr>'+cells.map(function(c){return '<td>'+c+'</td>'}).join('')+'</tr>';
+    });
+    md=md.replace(/((?:<tr>.*?<\/tr>\n?)+)/g,'<table><tbody>$1</tbody></table>');
+    md=md.replace(/<!--sep-->\n?/g,'');
+    md=md.replace(/\*\*(.+?)\*\*/g,'<b>$1</b>');
+    md=md.replace(/\*(.+?)\*/g,'<i>$1</i>');
+    md=md.replace(/\n\n/g,'</p><p>');
+    md=md.replace(/\n/g,'<br>');
+    html+='<div contenteditable="true" onblur="saveCell(this,\''+key+'\')" onfocus="this.classList.add(\'cell-edited\')" style="line-height:1.7;font-size:12px;white-space:pre-wrap;word-break:break-word"><p>'+md+'</p></div>';
+  }else{
+    html+='<p style="color:var(--dim);font-size:11px;margin:8px 0">暂无剧本内容</p>';
+  }
+  html+='</div>';el.innerHTML=html;
+}
+
+// CHARACTERS — ALL fields editable
+function rChars(){
+  var el=document.getElementById('panel-characters');
+  var chars=D.characters||[];
+  var html='<div class="section">';
+  chars.forEach(function(c,ci){
+    var attrs=c.attrs||{};
+    html+='<div class="card">';
+    html+='<h3 contenteditable="true" onblur="saveCell(this,\'char_'+ci+'_name\')" onfocus="this.classList.add(\'cell-edited\')">'+esc(gVal('char_'+ci+'_name',c.name))+'</h3>';
+    if(c.desc)html+='<p contenteditable="true" onblur="saveCell(this,\'char_'+ci+'_desc\')" onfocus="this.classList.add(\'cell-edited\')" style="color:var(--dim);font-size:11px;margin-bottom:6px">'+esc(gVal('char_'+ci+'_desc',c.desc))+'</p>';
+    html+='<table><tbody>';
+    Object.keys(attrs).forEach(function(k){
+      html+='<tr><td style="color:var(--dim);width:80px;white-space:nowrap">'+esc(k)+'</td><td contenteditable="true" onblur="saveCell(this,\'char_'+ci+'_'+k+'\')" onfocus="this.classList.add(\'cell-edited\')">'+esc(gVal('char_'+ci+'_'+k,attrs[k]))+'</td></tr>';
+    });
+    html+='</tbody></table></div>';
+  });
+  html+='</div>';el.innerHTML=html;
+}
+
+// SCENES — ALL fields editable
+function rScenes(){
+  var el=document.getElementById('panel-scenes');
+  var scenes=(D.manifest&&D.manifest.scenes)?D.manifest.scenes:[];
+  var html='<div class="section">';
+  scenes.forEach(function(s,si){
+    var attrs=s.attrs||{};
+    html+='<div class="card">';
+    html+='<h3 contenteditable="true" onblur="saveCell(this,\'scene_'+si+'_name\')" onfocus="this.classList.add(\'cell-edited\')">'+esc(gVal('scene_'+si+'_name',s.name))+'</h3>';
+    html+='<table><tbody>';
+    Object.keys(attrs).forEach(function(k){
+      if(k==='------')return;
+      html+='<tr><td style="color:var(--dim);width:80px;white-space:nowrap">'+esc(k)+'</td><td contenteditable="true" onblur="saveCell(this,\'scene_'+si+'_'+k+'\')" onfocus="this.classList.add(\'cell-edited\')">'+esc(gVal('scene_'+si+'_'+k,attrs[k]))+'</td></tr>';
+    });
+    html+='</tbody></table></div>';
+  });
+  html+='</div>';el.innerHTML=html;
+}
+
+// PROPS — ALL fields editable
+function rProps(){
+  var el=document.getElementById('panel-props');
+  var props=(D.manifest&&D.manifest.props)?D.manifest.props:[];
+  var html='<div class="section"><div class="tbl-wrap"><table><thead><tr><th>名称</th><th>描述</th><th>出现集数</th></tr></thead><tbody>';
+  props.forEach(function(p,pi){
+    html+='<tr><td contenteditable="true" onblur="saveCell(this,\'prop_'+pi+'_name\')" onfocus="this.classList.add(\'cell-edited\')">'+esc(gVal('prop_'+pi+'_name',p.name))+'</td><td contenteditable="true" onblur="saveCell(this,\'prop_'+pi+'_desc\')" onfocus="this.classList.add(\'cell-edited\')">'+esc(gVal('prop_'+pi+'_desc',p.description))+'</td><td contenteditable="true" onblur="saveCell(this,\'prop_'+pi+'_eps\')" onfocus="this.classList.add(\'cell-edited\')">'+esc(gVal('prop_'+pi+'_eps',p.episodes))+'</td></tr>';
+  });
+  html+='</tbody></table></div></div>';el.innerHTML=html;
+}
+
+// IMAGE PROMPTS — editable
+function rImgPrompts(){
+  var el=document.getElementById('panel-image-prompts');
+  var ep=findEp(curEp);
+  if(!ep){el.innerHTML='<div class="section"><p>无数据</p></div>';return}
+  var imgs=((ep.prompts||{}).imagePrompts)||[];
+  var html='<div class="section"><h2>'+esc(ep.id)+' — 图片 Prompts ('+imgs.length+')</h2>';
+  imgs.forEach(function(img,i){
+    var key=ep.id+'_ip_'+i;
+    var dv=gVal(key,img.prompt||'');
+    html+='<div class="prompt-card">';
+    html+='<div class="prompt-header">Frame '+(img.frame||(i+1))+' — '+esc(img.time||'')+'</div>';
+    html+='<div class="prompt-body" contenteditable="true" onblur="saveCell(this,\''+key+'\')" onfocus="this.classList.add(\'cell-edited\')">'+esc(dv)+'</div>';
+    if(img.attachments&&img.attachments.length){
+      html+='<div class="attach-grid">'+renderAttachments(img.attachments)+'</div>';
+    }
+    html+='<div class="prompt-actions"><button class="btn-sm" onclick="doCopy(this)">📋 复制</button></div>';
+    html+='</div>';
+  });
+  html+='</div>';el.innerHTML=html;
+}
+
+// VIDEO PROMPTS — editable
+function rVidPrompts(){
+  var el=document.getElementById('panel-video-prompts');
+  var ep=findEp(curEp);
+  if(!ep){el.innerHTML='<div class="section"><p>无数据</p></div>';return}
+  var vids=((ep.prompts||{}).videoPrompts)||[];
+  var html='<div class="section"><h2>'+esc(ep.id)+' — 视频 Prompts ('+vids.length+')</h2>';
+  vids.forEach(function(vid,i){
+    var key=ep.id+'_vp_'+i;
+    var dv=gVal(key,vid.prompt||'');
+    html+='<div class="prompt-card">';
+    html+='<div class="prompt-header">Shot '+(vid.shot||(i+1))+' — '+esc(vid.timeRange||'')+' ('+esc(vid.duration||'')+' )</div>';
+    html+='<div class="prompt-body" contenteditable="true" onblur="saveCell(this,\''+key+'\')" onfocus="this.classList.add(\'cell-edited\')">'+esc(dv)+'</div>';
+    if(vid.attachments&&vid.attachments.length){
+      html+='<div class="attach-grid">'+renderAttachments(vid.attachments)+'</div>';
+    }
+    html+='<div class="prompt-actions"><button class="btn-sm" onclick="doCopy(this)">📋 复制</button></div>';
+    html+='</div>';
+  });
+  html+='</div>';el.innerHTML=html;
+}
+
+// ASSETS
+function rAssets(){
+  var el=document.getElementById('panel-assets');
+  var images=D.images||{global:[],per_episode:{}};
+  var html='<div class="section"><h2>素材库</h2>';
+  if(images.global&&images.global.length){
+    html+='<h3>全局图片 ('+images.global.length+')</h3><div class="attach-grid">';
+    images.global.forEach(function(img){
+      var src=img.path||img.url||'';
+      var name=img.name||src;
+      if(src)html+='<div class="attach-item" onclick="openModal(\''+esc(src).replace(/'/g,"'")+'\')"><img src="'+src+'" alt="'+esc(name)+'"><span class="attach-badge">'+esc(name).substring(0,20)+'</span></div>';
+      else html+='<span class="attach-text">'+esc(name)+'</span>';
+    });
+    html+='</div>';
+  }
+  if(images.per_episode){
+    var eps=Object.keys(images.per_episode);
+    if(eps.length){
+      html+='<h3>分集图片</h3>';
+      eps.forEach(function(epId){
+        var items=images.per_episode[epId];
+        html+='<div style="margin:6px 0"><span style="color:var(--dim);font-size:11px">'+esc(epId)+': '+items.length+' 张</span></div>';
+        html+='<div class="attach-grid">';
+        items.forEach(function(img){
+          var src=img.path||img.url||'';
+          if(src)html+='<div class="attach-item" onclick="openModal(\''+esc(src).replace(/'/g,"'")+'\')"><img src="'+src+'"></div>';
+          else html+='<span class="attach-text">'+esc(img.name||'')+'</span>';
+        });
+        html+='</div>';
+      });
+    }
+  }
+  html+='</div>';el.innerHTML=html;
+}
+
+// ATTACHMENTS
+function renderAttachments(atts){
+  var html='';
+  atts.forEach(function(a){
+    if(typeof a==='string'){
+      if(isImage(a))html+='<div class="attach-item" onclick="openModal(\''+esc(a).replace(/'/g,"'")+'\')"><img src="'+esc(a)+'"><span class="attach-badge">img</span></div>';
+      else if(isVideo(a))html+='<div class="attach-item" onclick="openModal(\''+esc(a).replace(/'/g,"'")+'\')"><video src="'+esc(a)+'"></video><span class="attach-badge">vid</span></div>';
+      else html+='<span class="attach-text" title="'+esc(a)+'">'+esc(a).substring(0,50)+'</span>';
+    }else if(typeof a==='object'){
+      var src=a.path||a.url||'';
+      var name=a.name||'';
+      if(src){
+        if(isImage(src))html+='<div class="attach-item" onclick="openModal(\''+esc(src).replace(/'/g,"'")+'\')"><img src="'+esc(src)+'"><span class="attach-badge">'+esc(name).substring(0,10)+'</span></div>';
+        else if(isVideo(src))html+='<div class="attach-item" onclick="openModal(\''+esc(src).replace(/'/g,"'")+'\')"><video src="'+esc(src)+'"></video><span class="attach-badge">'+esc(name).substring(0,10)+'</span></div>';
+        else html+='<span class="attach-text" title="'+esc(src)+'">'+esc(name||src).substring(0,40)+'</span>';
+      }
+    }
+  });
+  return html;
+}
+function isImage(s){return /\.(jpe?g|png|webp|gif|bmp|svg|avif|jfif)\$/i.test(s)}
+function isVideo(s){return /\.(mp4|webm|ogg|mov|m4v)\$/i.test(s)}
+
+// COPY
+function doCopy(btn){
+  var card=btn.closest('.prompt-card');
+  var body=card.querySelector('.prompt-body');
+  navigator.clipboard.writeText(body.textContent).then(function(){
+    btn.textContent='✅ 已复制';setTimeout(function(){btn.textContent='📋 复制'},1500);
+  }).catch(function(){
+    var ta=document.createElement('textarea');ta.value=body.textContent;document.body.appendChild(ta);ta.select();document.execCommand('copy');document.body.removeChild(ta);
+    btn.textContent='✅ 已复制';setTimeout(function(){btn.textContent='📋 复制'},1500);
+  });
+}
+
+// MODAL
+function openModal(src){
+  var mc=document.getElementById('modalContent');
+  if(isImage(src))mc.innerHTML='<img src="'+src+'">';
+  else if(isVideo(src))mc.innerHTML='<video src="'+src+'" controls autoplay></video>';
+  else mc.innerHTML='<p style="padding:20px;color:var(--dim)">无法预览</p>';
+  document.getElementById('imgModal').style.display='flex';
+}
+function closeModal(){document.getElementById('imgModal').style.display='none';document.getElementById('modalContent').innerHTML=''}
+
+// LOAD JSON — import from local file
+function doLoadJSON(){
+  document.getElementById('fileInputJSON').click();
+}
+function handleFileLoad(input){
+  var file=input.files[0];
+  if(!file)return;
+  var reader=new FileReader();
+  reader.onload=function(e){
+    try{
+      var data=JSON.parse(e.target.result);
+      if(!data||!data.episodes){alert('⚠️ JSON 格式无效：缺少 episodes 数组');return}
+      D=data;
+      edits={};
+      statuses={};
+      localStorage.removeItem('wb_edits');
+      localStorage.removeItem('wb_statuses');
+      curEp=1;
+      initApp();
+      var btn=document.getElementById('btnLoadJSON');
+      if(btn){
+        var orig=btn.textContent;
+        btn.textContent='✅ 已加载';
+        setTimeout(function(){btn.textContent=orig},2000);
+      }
+    }catch(err){
+      alert('⚠️ JSON 解析失败：'+err.message);
+    }
+  };
+  reader.onerror=function(){alert('⚠️ 文件读取失败')};
+  reader.readAsText(file);
+  input.value='';
+}
+
+// SAVE JSON — merge edits back into D and download
+function mergeEditsIntoD(){
+  var out=JSON.parse(JSON.stringify(D));
+  for(var key in edits){
+    var val=edits[key];
+    // Storyboard: EP-01_sb_0_# → ['EP','01','sb','0','#']
+    if(key.match(/^EP-\d+_sb_\d+/)){
+      var p=key.split('_');
+      var eId=p[0]+'-'+p[1]; var idx=parseInt(p[3]); var col=p[4];
+      var ep=out.episodes.find(function(e){return e.id===eId});
+      if(ep&&ep.storyboard&&ep.storyboard.shots[idx]) ep.storyboard.shots[idx][col]=val;
+    }
+    // Image prompt: EP-01_ip_0 → ['EP','01','ip','0']
+    else if(key.match(/^EP-\d+_ip_\d+$/)){
+      var p=key.split('_');
+      var eId=p[0]+'-'+p[1]; var idx=parseInt(p[3]);
+      var ep=out.episodes.find(function(e){return e.id===eId});
+      if(ep&&ep.prompts&&ep.prompts.imagePrompts&&ep.prompts.imagePrompts[idx]) ep.prompts.imagePrompts[idx].prompt=val;
+    }
+    // Video prompt: EP-01_vp_0 → ['EP','01','vp','0']
+    else if(key.match(/^EP-\d+_vp_\d+$/)){
+      var p=key.split('_');
+      var eId=p[0]+'-'+p[1]; var idx=parseInt(p[3]);
+      var ep=out.episodes.find(function(e){return e.id===eId});
+      if(ep&&ep.prompts&&ep.prompts.videoPrompts&&ep.prompts.videoPrompts[idx]) ep.prompts.videoPrompts[idx].prompt=val;
+    }
+    // Script: EP-01_script → ['EP','01','script']
+    else if(key.match(/^EP-\d+_script$/)){
+      var p=key.split('_');
+      var eId=p[0]+'-'+p[1];
+      var ep=out.episodes.find(function(e){return e.id===eId});
+      if(ep) ep.script=val;
+    }
+    // Character: char_0_name → ['char','0','name']
+    else if(key.match(/^char_\d+_name$/)){
+      var p=key.split('_');
+      var idx=parseInt(p[1]);
+      if(out.characters&&out.characters[idx]) out.characters[idx].name=val;
+    }
+    else if(key.match(/^char_\d+_desc$/)){
+      var p=key.split('_');
+      var idx=parseInt(p[1]);
+      if(out.characters&&out.characters[idx]) out.characters[idx].desc=val;
+    }
+    else if(key.match(/^char_\d+_attrs_\w+$/)){
+      var p=key.split('_');
+      var idx=parseInt(p[1]);
+      var ak=p[3]+'_'+p[4]; // rejoin attr key
+      if(out.characters&&out.characters[idx]&&out.characters[idx].attrs) out.characters[idx].attrs[ak]=val;
+    }
+    else if(key.match(/^char_\d+/)){
+      var p=key.split('_');
+      var idx=parseInt(p[1]);
+      var ak=p[2]; // attr key
+      if(out.characters&&out.characters[idx]&&out.characters[idx].attrs) out.characters[idx].attrs[ak]=val;
+    }
+    // Scene: scene_0_name
+    else if(key.match(/^scene_\d+_name$/)){
+      var p=key.split('_');
+      var idx=parseInt(p[1]);
+      if(out.manifest&&out.manifest.scenes&&out.manifest.scenes[idx]) out.manifest.scenes[idx].name=val;
+    }
+    else if(key.match(/^scene_\d+/)){
+      var p=key.split('_');
+      var idx=parseInt(p[1]);
+      var ak=p[2];
+      if(out.manifest&&out.manifest.scenes&&out.manifest.scenes[idx]&&out.manifest.scenes[idx].attrs) out.manifest.scenes[idx].attrs[ak]=val;
+    }
+    // Prop: prop_0_name, prop_0_desc, prop_0_eps
+    else if(key.match(/^prop_\d+$/)){
+      var p=key.split('_');
+      var idx=parseInt(p[1]);
+      if(out.manifest&&out.manifest.props&&out.manifest.props[idx]){
+        if(p[2]==='name') out.manifest.props[idx].name=val;
+        else if(p[2]==='desc') out.manifest.props[idx].description=val;
+        else if(p[2]==='eps') out.manifest.props[idx].episodes=val;
+      }
+    }
+  }
+  return out;
+}
+function doSaveJSON(){
+  var out=mergeEditsIntoD();
+  out._statuses=statuses;
+  var blob=new Blob([JSON.stringify(out,null,2)],{type:'application/json'});
+  var a=document.createElement('a');
+  a.href=URL.createObjectURL(blob);
+  a.download='project_data.json';
+  a.click();
+  // Feedback
+  var btn=document.querySelector('[onclick="doSaveJSON()"]');
+  if(btn){
+    var orig=btn.textContent;
+    btn.textContent='✅ 已保存';
+    setTimeout(function(){btn.textContent=orig},2000);
+  }
+}
+
+// LAUNCH
+function initApp(){
+  loadP();
+  var title=D.project||D.manifest?.title||'项目';
+  var sub='';
+  if(D.total_episodes)sub+='共 '+D.total_episodes+' 集';
+  if(D.manifest&&D.manifest.aspect_ratio)sub+=(sub?',':'')+' '+D.manifest.aspect_ratio;
+  document.getElementById('headerTitle').innerHTML='<span>'+esc(title)+'</span><span class="header-sub">'+esc(sub)+'</span>';
+  buildTabs();buildEpSelect();renderSidebar();selectEp(1);
+}
+if(D && D.episodes){ initApp(); }
+</script>
+</body>
+</html>
