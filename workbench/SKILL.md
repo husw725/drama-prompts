@@ -75,8 +75,10 @@ HTML 是固定"应用"（`template.html`），JSON 是数据（`project_data.jso
 - `manifest.scenes.attrs["------"]` = "------" 是分隔线，前端渲染时跳过
 - `prompts[].attachments` = **字符串数组**，可空/单条/多条，存图片/视频地址
 - `episodes[].script` = **完整 markdown 剧本内容**（从 `script/EP-XX.md` 读取全文），前端做基本 markdown→HTML 转换
-- **不包含 `images` 字段** — 用户要求不带图片素材，保持 JSON 体积小
-- 编辑保存：所有内容 `contenteditable`，失焦自动存 localStorage（无导入/导出按钮）
+- **包含 `images` 字段**（可选），`attachments` 是字符串数组
+- 编辑保存：所有内容 `contenteditable`，失焦自动存 localStorage
+- **💾 保存 JSON**：头部按钮，合并 edits 到 D 后下载 `project_data.json`
+- **📂 加载 JSON**：头部按钮，选择本地 JSON 文件 → FileReader → 替换 D → 重渲染
 
 ### Step 3: 构建单文件 `index.html`
 
@@ -137,10 +139,10 @@ D = JSON.parse(jsonStr);
 - **全量可编辑**：所有 Tab 中所有文本字段均 `contenteditable`，失焦自动存 localStorage
 - **刷新不丢**：渲染用 `gVal(key, default)` 优先读取 localStorage 编辑值（不是原始数据）
 - **💾 保存 JSON**：头部按钮，点击后 `mergeEditsIntoD()` 将 edits 合并回 JSON → 下载 `project_data.json` → 替换后 `python3 build_html.py` 重新生成
+- **📂 加载 JSON**：头部按钮，点击后 `FileReader.readAsText` → `JSON.parse` → 替换全局 `D` → 清空 edits/statuses → 清除 localStorage → `initApp()` 重渲染
 - **附件预览**：图片显示缩略图（点击放大），视频显示播放器（点击播放）
 - **集数切换**：右上角下拉 + 左侧栏点击
 - **状态管理**：每集 6 阶段（草稿→分镜完成→生图中→生图完成→生视频中→成片完成），状态颜色侧栏显示
-- **无导入/导出按钮**：v3.4 已移除。编辑自动保存到 localStorage，刷新不丢
 - **移动端适配**：侧栏隐藏、Tab 横滑、附件缩略图缩小
 
 ## JSON 格式验证
@@ -202,13 +204,35 @@ headers = [h.strip() for h in lines[0].split('|')[1:-1]]
 - `EP-01_script` → 剧本全文编辑
 - **不要写成 `parts[2]`** — 那是 `sb/ip/vp` 标记，不是索引
 
-### 数据注入方式（v3.5）
+### 数据注入方式（v4.0 — JSON 分块）
 
-- template.html 放 `<script type="application/json" id="__data__"></script>` 占位符
-- build_html.py 用 `json.dumps(data, ensure_ascii=True)` 替换占位符为 `<script type="application/json" id="__data__">实际JSON</script>`
-- HTML 启动 IIFE：`D = JSON.parse(document.getElementById('__data__').textContent)`
-- **❌ 不要用 base64 分块方案** — 超过 500KB 时 JS 解析失败（`atob` 数组拼接触发浏览器限制）
-- **❌ 不要 `json.dumps(json.dumps(data))` 嵌套字符串** — 虽然能工作但多一层编码/解码，不如对象字面量
+**已验证方案：JSON 字符串按 ~30KB 分块，每块塞进 `<script type="application/json" class="__data_chunk__">` 标签。**
+- template.html 放 `<!--DATA_CHUNKS-->` 占位符
+- build_html.py：`json.dumps(data, ensure_ascii=False)` → 按 30KB 切分 → 每个 chunk 注入 `<script type="application/json" class="__data_chunk__">chunk内容</script>` → 替换占位符
+- HTML 启动 IIFE：收集所有 `script.__data_chunk__` 的 textContent → 拼接 → JSON.parse
+- Chunk 内如有 `</script>` 需转义为 `<\\/script>`
+- **有 XHR fallback**：分块失败则尝试 `XMLHttpRequest('project_data.json')`（HTTP 模式）
+
+**❌ 不要用的方案（全部已在 v3.4-v3.9 中验证失败）：**
+
+| 方案 | 失败原因 |
+|------|---------|
+| base64 数组 + atob 循环 | 900KB+ 时 atob 超时，JS 异常 |
+| base64 字符串拼接（4924行 `+`） | JS 引擎解析超时 |
+| `json.dumps(json.dumps(data))` 嵌套字符串 | 引号冲突，需要额外解码层 |
+| `<script type="application/json">` **单一大块**（920KB） | **浏览器解析超大 script 标签后，后面的 JS 脚本根本不执行！IIFE 不跑，D 永远是 null** |
+| `<div>` + base64 | atob() 982KB 超时，2 个 JS 异常 |
+| 单行 JS 对象字面量 `D = {...}` | JSON 里含大量 `"` 直接破坏 JS 语法 |
+
+### 编辑值渲染（gVal 模式）
+
+**关键修复**：渲染时**必须用 `gVal(key, default)`** 读取值，不能直接用原始数据。否则刷新后编辑值丢失。
+```javascript
+// 正确：优先返回 localStorage 中的编辑值
+function gVal(key, def) { return edits[key] !== undefined ? edits[key] : def }
+// 渲染时：var dv = gVal(key, shot[k] || '');
+```
+**失焦清除样式**：`saveCell` 中必须 `el.classList.remove('cell-edited')`，否则高亮不消失。
 
 ### initApp 执行时机
 
