@@ -6,7 +6,7 @@ author: Hermes Agent
 metadata:
   hermes:
     tags: [Short-Drama, Production-Workflow, HTML-Workbench, Project-Index]
-    related_skills: [hermes-short-drama-team, seedance-prompt-optimizer, screenplay-hollywood-format]
+    related_skills: [drama-team, seedance-prompt-optimizer, screenplay-hollywood-format]
 ---
 
 # Short Drama Production Index
@@ -240,6 +240,5 @@ function gVal(key, def) { return edits[key] !== undefined ? edits[key] : def }
 
 ## 相关技能
 
-- `hermes-short-drama-team` — 短剧编剧系统
+- `drama-team` — 短剧编剧系统
 - `seedance2-short-drama-workflow` — Seedance 2.0 工作流
-- `short-drama-image-generation` — Dreamina 生图

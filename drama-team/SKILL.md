@@ -1850,7 +1850,7 @@ a vampire woman looking in terror...
 
 ## 相关技能
 
-- `hermes-short-drama-team` — 短剧编剧全流程系统
+- `drama-team` — 短剧编剧全流程系统
 - `short-drama-production-index` — 短剧工作台 JSON/HTML 生成
 
 ---
