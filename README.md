@@ -1,6 +1,6 @@
-# Drama Prompts & Reviewers
+# Drama Prompts
 
-短剧 AI 制作工具集 — Prompt 优化器 + 剧本格式化 + 制作工作台。
+短剧 AI 制作工具集 — 编剧全流程 + Prompt 优化 + 剧本格式化 + 制作工作台。
 
 ## 给 Agent 的使用方式
 
@@ -11,6 +11,23 @@
 将对应目录的 `SKILL.md` 作为技能加载，或将 `prompt_template.txt` 内容作为 system prompt 传入。
 
 ## 工具集
+
+### Drama Team
+
+短剧编剧全流程系统 — 严格按集串行生成，含剧集连续性追踪、伏笔管理、视觉一致性管控与独立审核机制。
+
+```
+drama-team/
+├── SKILL.md              # 全流程技能（含角色/剧本/分镜/Prompt 生成 + 审核）
+├── prompts/              # 子 Agent prompt（writer/aligner/recorder）
+├── templates/            # 模板文件（角色/剧集/大纲/视觉资产）
+├── references/           # 参考文档
+├── docs/                 # 使用文档
+├── examples/             # 示例项目
+└── scripts/              # 辅助脚本
+```
+
+**触发条件：** 用户需要从小说/大纲生成完整短剧剧本、分镜、AI Prompt。
 
 ### Seedance Prompt Optimizer
 
@@ -54,6 +71,14 @@ short-drama-production-index/
 
 ```
 drama-prompts/
+├── drama-team/                    # 短剧编剧全流程
+│   ├── SKILL.md
+│   ├── prompts/
+│   ├── templates/
+│   ├── references/
+│   ├── docs/
+│   ├── examples/
+│   └── scripts/
 ├── seedance-prompt-optimizer/     # Seedance Prompt 优化器
 │   ├── SKILL.md
 │   └── prompt_template.txt
