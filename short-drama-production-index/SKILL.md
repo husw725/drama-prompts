@@ -241,4 +241,4 @@ function gVal(key, def) { return edits[key] !== undefined ? edits[key] : def }
 ## 相关技能
 
 - `drama-team` — 短剧编剧系统
-- `seedance2-short-drama-workflow` — Seedance 2.0 工作流
+- `seedance-prompt-optimizer` — Seedance 2.0 Prompt 优化器
