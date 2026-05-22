@@ -1,0 +1,718 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>drama-team v3.8 — 小说→剧本 全流程</title>
+<style>
+:root{--bg:#0f172a;--surface:#1e293b;--surface2:#334155;--border:#475569;--text:#e2e8f0;--dim:#94a3b8;--blue:#3b82f6;--red:#ef4444;--green:#22c55e;--purple:#a855f7;--orange:#f97316;--cyan:#06b6d4;--yellow:#eab308}
+*{margin:0;padding:0;box-sizing:border-box}
+body{background:var(--bg);color:var(--text);font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;line-height:1.6}
+a{color:var(--cyan);text-decoration:none}
+
+/* Hero */
+.hero{text-align:center;padding:48px 24px 32px;border-bottom:1px solid var(--border)}
+.hero h1{font-size:2rem;font-weight:700;background:linear-gradient(135deg,var(--blue),var(--purple));-webkit-background-clip:text;-webkit-text-fill-color:transparent;margin-bottom:8px}
+.hero p{color:var(--dim);font-size:.95rem}
+.tags{display:flex;gap:8px;justify-content:center;margin-top:16px;flex-wrap:wrap}
+.tag{padding:3px 12px;border-radius:99px;font-size:.75rem;font-weight:600;border:1px solid}
+.tag-blue{border-color:var(--blue);color:var(--blue)}
+.tag-red{border-color:var(--red);color:var(--red)}
+.tag-green{border-color:var(--green);color:var(--green)}
+.tag-purple{border-color:var(--purple);color:var(--purple)}
+
+/* Pipeline Overview */
+.overview{padding:32px 24px;overflow-x:auto}
+.overview h2{text-align:center;font-size:1.25rem;margin-bottom:24px}
+.pipe-line{display:flex;align-items:center;justify-content:center;gap:0;min-width:800px;margin:0 auto}
+.pipe-node{display:flex;flex-direction:column;align-items:center;cursor:pointer;padding:8px 12px;border-radius:12px;transition:all .2s;min-width:90px}
+.pipe-node:hover{background:var(--surface2)}
+.pipe-node.active{background:var(--surface2);box-shadow:0 0 20px rgba(59,130,246,.3)}
+.pipe-dot{width:40px;height:40px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:1.1rem;font-weight:700;margin-bottom:6px;border:2px solid}
+.pipe-node.blue .pipe-dot{border-color:var(--blue);color:var(--blue);background:rgba(59,130,246,.1)}
+.pipe-node.red .pipe-dot{border-color:var(--red);color:var(--red);background:rgba(239,68,68,.1)}
+.pipe-node.green .pipe-dot{border-color:var(--green);color:var(--green);background:rgba(34,197,94,.1)}
+.pipe-node.purple .pipe-dot{border-color:var(--purple);color:var(--purple);background:rgba(168,85,247,.1)}
+.pipe-label{font-size:.75rem;color:var(--dim);text-align:center;white-space:nowrap}
+.pipe-arrow{color:var(--border);font-size:1.2rem;margin:0 4px;padding-bottom:20px}
+
+/* Main Content */
+.main{display:flex;gap:0;min-height:70vh;border-top:1px solid var(--border)}
+.sidebar{width:260px;min-width:260px;border-right:1px solid var(--border);padding:16px;overflow-y:auto}
+.sidebar h3{font-size:.85rem;color:var(--dim);margin-bottom:12px;text-transform:uppercase;letter-spacing:1px}
+.step-list{list-style:none}
+.step-item{padding:8px 12px;border-radius:8px;cursor:pointer;font-size:.85rem;margin-bottom:4px;display:flex;align-items:center;gap:8px;transition:all .15s}
+.step-item:hover{background:var(--surface)}
+.step-item.active{background:var(--surface2);font-weight:600}
+.step-num{width:24px;height:24px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:.7rem;font-weight:700;flex-shrink:0}
+.step-item.blue .step-num{background:rgba(59,130,246,.2);color:var(--blue)}
+.step-item.red .step-num{background:rgba(239,68,68,.2);color:var(--red)}
+.step-item.green .step-num{background:rgba(34,197,94,.2);color:var(--green)}
+.step-item.purple .step-num{background:rgba(168,85,247,.2);color:var(--purple)}
+
+.content{flex:1;padding:24px 32px;overflow-y:auto}
+.content h2{font-size:1.3rem;margin-bottom:4px}
+.content .subtitle{color:var(--dim);font-size:.9rem;margin-bottom:20px}
+
+/* Info Cards */
+.info-grid{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:20px}
+.info-card{background:var(--surface);border-radius:10px;padding:14px 16px;border:1px solid var(--border)}
+.info-card label{font-size:.7rem;color:var(--dim);text-transform:uppercase;letter-spacing:.5px;display:block;margin-bottom:4px}
+.info-card span{font-size:.85rem;font-weight:600}
+
+/* Prompt Terminal */
+.prompt-section{margin-bottom:20px}
+.prompt-section h3{font-size:.9rem;margin-bottom:8px;display:flex;align-items:center;gap:8px}
+.terminal{background:#0c0c0c;border-radius:10px;border:1px solid #333;overflow:hidden;position:relative}
+.terminal-header{background:#1a1a1a;padding:8px 14px;display:flex;align-items:center;gap:8px;border-bottom:1px solid #333}
+.terminal-dot{width:10px;height:10px;border-radius:50%}
+.terminal-dot.r{background:#ff5f57}.terminal-dot.y{background:#febc2e}.terminal-dot.g{background:#28c840}
+.terminal-title{font-size:.7rem;color:#888;margin-left:8px;font-family:monospace}
+.terminal-body{padding:16px 20px;font-family:'Fira Code',Consolas,'Courier New',monospace;font-size:.82rem;line-height:1.7;color:#c8d6e5;white-space:pre-wrap;max-height:400px;overflow-y:auto;border-left:3px solid var(--cyan);margin-left:0}
+.terminal-body .kw{color:#7ec8e3}
+.terminal-body .fn{color:#f0c674}
+.terminal-body .str{color:#b5e89b}
+.terminal-body .cmt{color:#6a737d;font-style:italic}
+.terminal-body .warn{color:var(--orange)}
+.terminal-body .err{color:var(--red)}
+.terminal-body .ok{color:var(--green)}
+.copy-btn{position:absolute;top:6px;right:12px;background:var(--surface2);border:1px solid var(--border);color:var(--dim);padding:4px 10px;border-radius:6px;cursor:pointer;font-size:.7rem}
+.copy-btn:hover{background:var(--border);color:var(--text)}
+
+/* Output Preview */
+.output-section{margin-bottom:20px}
+.output-section h3{font-size:.9rem;margin-bottom:8px;display:flex;align-items:center;gap:8px}
+.output-box{background:var(--surface);border:1px solid var(--border);border-radius:10px;padding:16px 20px;font-size:.82rem;line-height:1.7;max-height:300px;overflow-y:auto}
+.output-box h4{color:var(--cyan);margin:8px 0 4px;font-size:.85rem}
+.output-box table{width:100%;border-collapse:collapse;font-size:.78rem;margin:8px 0}
+.output-box th{background:var(--surface2);padding:6px 8px;text-align:left;font-weight:600;border:1px solid var(--border)}
+.output-box td{padding:6px 8px;border:1px solid var(--border)}
+.output-box code{background:var(--surface2);padding:1px 6px;border-radius:4px;font-family:monospace;font-size:.78rem}
+
+/* Mechanisms */
+.mechanisms{padding:32px 24px;border-top:1px solid var(--border)}
+.mechanisms h2{text-align:center;font-size:1.25rem;margin-bottom:24px}
+.mech-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(240px,1fr));gap:16px;max-width:900px;margin:0 auto}
+.mech-card{background:var(--surface);border:1px solid var(--border);border-radius:12px;padding:20px}
+.mech-card h3{font-size:.95rem;margin-bottom:10px;display:flex;align-items:center;gap:8px}
+.mech-card p{font-size:.8rem;color:var(--dim);line-height:1.6}
+.mech-card .states{display:flex;flex-wrap:wrap;gap:6px;margin-top:8px}
+.mech-card .state{padding:2px 8px;border-radius:6px;font-size:.72rem;background:var(--surface2)}
+
+/* File Index */
+.file-index{padding:32px 24px;border-top:1px solid var(--border)}
+.file-index h2{text-align:center;font-size:1.25rem;margin-bottom:20px}
+.file-table{max-width:700px;margin:0 auto;border-collapse:collapse;font-size:.82rem;width:100%}
+.file-table th{background:var(--surface2);padding:8px 12px;text-align:left;border:1px solid var(--border)}
+.file-table td{padding:8px 12px;border:1px solid var(--border)}
+.file-table tr:hover td{background:var(--surface)}
+
+/* Responsive */
+@media(max-width:768px){
+  .main{flex-direction:column}
+  .sidebar{width:100%;min-width:0;border-right:none;border-bottom:1px solid var(--border);max-height:200px}
+  .info-grid{grid-template-columns:1fr}
+  .pipe-line{min-width:600px}
+  .content{padding:16px}
+}
+</style>
+</head>
+<body>
+
+<!-- Hero -->
+<div class="hero">
+  <h1>drama-team v3.8</h1>
+  <p>小说 → 剧本 全流程可视化 — 叙事层与制作层分离架构</p>
+  <div class="tags">
+    <span class="tag tag-blue">全局阶段</span>
+    <span class="tag tag-red">🔥 叙事层（串行）</span>
+    <span class="tag tag-green">制作层（批量）</span>
+    <span class="tag tag-purple">交付</span>
+  </div>
+</div>
+
+<!-- Pipeline Overview -->
+<div class="overview">
+  <h2>流程总览</h2>
+  <div class="pipe-line" id="pipeLine">
+    <div class="pipe-node blue" data-step="0" onclick="goStep(0)"><div class="pipe-dot">0</div><div class="pipe-label">输入路由</div></div>
+    <div class="pipe-arrow">→</div>
+    <div class="pipe-node blue" data-step="1" onclick="goStep(1)"><div class="pipe-dot">1</div><div class="pipe-label">大纲</div></div>
+    <div class="pipe-arrow">→</div>
+    <div class="pipe-node blue" data-step="2" onclick="goStep(2)"><div class="pipe-dot">2</div><div class="pipe-label">人物</div></div>
+    <div class="pipe-arrow">→</div>
+    <div class="pipe-node blue" data-step="3" onclick="goStep(3)"><div class="pipe-dot">3</div><div class="pipe-label">视觉资产</div></div>
+    <div class="pipe-arrow">→</div>
+    <div class="pipe-node red" data-step="4" onclick="goStep(4)"><div class="pipe-dot">4</div><div class="pipe-label">🔥逐集剧本</div></div>
+    <div class="pipe-arrow">→</div>
+    <div class="pipe-node red" data-step="5" onclick="goStep(5)"><div class="pipe-dot">5</div><div class="pipe-label">Aligner审核</div></div>
+    <div class="pipe-arrow">→</div>
+    <div class="pipe-node green" data-step="6" onclick="goStep(6)"><div class="pipe-dot">6</div><div class="pipe-label">批量分镜</div></div>
+    <div class="pipe-arrow">→</div>
+    <div class="pipe-node green" data-step="7" onclick="goStep(7)"><div class="pipe-dot">7</div><div class="pipe-label">批量Prompts</div></div>
+    <div class="pipe-arrow">→</div>
+    <div class="pipe-node purple" data-step="8" onclick="goStep(8)"><div class="pipe-dot">8</div><div class="pipe-label">更新连续性</div></div>
+  </div>
+</div>
+
+<!-- Main -->
+<div class="main">
+  <div class="sidebar">
+    <h3>Steps</h3>
+    <ul class="step-list" id="stepList"></ul>
+  </div>
+  <div class="content" id="contentArea">
+    <p style="color:var(--dim);text-align:center;padding-top:40px">点击左侧步骤或上方节点开始浏览</p>
+  </div>
+</div>
+
+<!-- Mechanisms -->
+<div class="mechanisms">
+  <h2>核心机制</h2>
+  <div class="mech-grid">
+    <div class="mech-card">
+      <h3>🔮 伏笔状态机</h3>
+      <p>跨集伏笔追踪，确保每条线索都有归宿</p>
+      <div class="states">
+        <span class="state">🔵 已埋</span>
+        <span class="state">🟡 待回收</span>
+        <span class="state">✅ 已回收</span>
+        <span class="state">⏳ 逾期</span>
+        <span class="state">❌ 废弃</span>
+      </div>
+    </div>
+    <div class="mech-card">
+      <h3>👥 三视角审核</h3>
+      <p>定性层：急躁哥(节奏) + 逻辑控(逻辑) + 视听专家(AI可行性) + 编剧同行(意图)</p>
+      <div class="states">
+        <span class="state">急躁哥</span>
+        <span class="state">逻辑控</span>
+        <span class="state">视听专家</span>
+        <span class="state">编剧同行</span>
+      </div>
+    </div>
+    <div class="mech-card">
+      <h3>🎬 导演覆盖</h3>
+      <p>当 Aligner 过严或误判时，导演可 override 审核结果</p>
+      <div class="states">
+        <span class="state">🟢 同意</span>
+        <span class="state">🟡 过严</span>
+        <span class="state">🔴 错误(override)</span>
+      </div>
+    </div>
+    <div class="mech-card">
+      <h3>⚡ 叙事/制作分离</h3>
+      <p>剧本串行保连续性，分镜/Prompts批量提速37%</p>
+      <div class="states">
+        <span class="state">🔥 剧本串行</span>
+        <span class="state">📦 分镜批量</span>
+        <span class="state">📦 Prompts批量</span>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- File Index -->
+<div class="file-index">
+  <h2>Parts 文件索引</h2>
+  <table class="file-table">
+    <tr><th>文件</th><th>行数</th><th>职责</th></tr>
+    <tr><td><code>workflow.md</code></td><td>213</td><td>七阶段工作流定义、串行/批量策略</td></tr>
+    <tr><td><code>reviewers.md</code></td><td>740</td><td>三视角评审团 + 三种 Aligner 评分体系</td></tr>
+    <tr><td><code>continuity.md</code></td><td>293</td><td>连续性追踪、伏笔状态机、上下文截断</td></tr>
+    <tr><td><code>reference-system.md</code></td><td>590</td><td>视觉资产参考体系、子Agent上下文压缩</td></tr>
+    <tr><td><code>templates.md</code></td><td>160</td><td>批量生成模式、工作台构建流程</td></tr>
+    <tr><td><code>architecture.md</code></td><td>80</td><td>核心机制、文件架构、竖屏视觉语法</td></tr>
+    <tr><td><code>ai-tools.md</code></td><td>120</td><td>AI工具能力边界、Seedance/Wan2.7限制</td></tr>
+    <tr><td><code>pitfalls.md</code></td><td>164</td><td>常见陷阱、生成策略硬规则</td></tr>
+    <tr><td><code>production.md</code></td><td>80</td><td>生产工作台、正则解析模式速查</td></tr>
+  </table>
+</div>
+
+<script>
+// Step data
+const STEPS = [
+  {
+    id: 0, title: "输入路由", color: "blue",
+    subtitle: "判断输入类型，选择对应流程",
+    inputs: ["用户提供的小说文本 / 好莱坞剧本 / 已有项目"],
+    outputs: ["路由决策：全流程 / 跳阶段 / 增量更新"],
+    prompt: `<span class="cmt">// 路由逻辑 — reviewers.md</span>
+
+<span class="kw">if</span> 输入包含 <span class="str">"## Scene"</span> / <span class="str">"## Dialogue"</span> / 剧本格式:
+    → <span class="fn">Script-Aligner</span> 路径（已有剧本，跳阶段1-2）
+
+<span class="kw">if</span> 输入是好莱坞标准格式剧本:
+    → 跳阶段1(大纲)+2(人物)，直接从阶段3开始
+
+<span class="kw">if</span> 已有项目目录（含 continuity.md）:
+    → <span class="fn">增量更新</span>模式（续写/修改/补遗）
+
+<span class="kw">else</span>:
+    → <span class="fn">全流程</span>：阶段1 → 2 → 3 → 4 → 5 → 6 → 7
+
+<span class="cmt">// project_type 标注（v3.8 ⭐）</span>
+<span class="kw">param</span> project_type: <span class="str">"novel_adaptation"</span> | <span class="str">"original_drama"</span> | <span class="str">"screenplay_adaptation"</span>
+<span class="cmt">// 影响大纲结构、付费墙位置、冲突类型权重</span>`,
+    outputPreview: `<h4>路由结果示例</h4>
+<code>project_type: novel_adaptation</code><br>
+<code>flow: full_pipeline (阶段1→7)</code><br>
+<code>source: Carmilla (Sheridan Le Fanu, 1872)</code><br>
+<code>target_episodes: 12</code>`
+  },
+  {
+    id: 1, title: "阶段1：大纲", color: "blue",
+    subtitle: "全局阶段（只跑一次）— 12集结构 + 付费墙",
+    inputs: ["小说全文", "project_type"],
+    outputs: ["outline.md"],
+    prompt: `<span class="cmt">// 阶段1：大纲生成 — workflow.md</span>
+
+<span class="fn">generate_outline</span>(novel_text, project_type):
+
+  <span class="cmt">// 1. 12集结构规划</span>
+  每集包含:
+    - 集号 + 标题 + 一句话梗概
+    - 冲突类型（超自然入侵/身份谜团/信息争夺/情感对峙/信任背叛/外部威胁）
+    - 钩子等级（1-5，5=最强）
+    - 预计时长：70s
+
+  <span class="cmt">// 2. 付费墙规划（v3.8 ⭐）</span>
+    - <span class="str">首集免费</span>: EP-01（首集=广告，钩子必须最高）
+    - <span class="str">付费墙位置</span>: EP-03后（EP-04起付费）
+    - <span class="str">免费集策略</span>: 允许牺牲逻辑换爽感
+    - <span class="str">付费集策略</span>: 逻辑不能崩，节奏可"前快后慢"
+    - <span class="str">沉没成本曲线</span>: EP-10+ 允许更慢更深
+
+  <span class="cmt">// 3. 冲突升级弧线</span>
+    确保冲突类型不连续重复，逐集升级
+
+  → <span class="fn">write_file</span>(<span class="str">"outline.md"</span>)
+  → <span class="warn">⚠️ 人工确认</span>（大纲决定全局走向）`,
+    outputPreview: `<h4>outline.md 片段</h4>
+<table>
+<tr><th>集号</th><th>标题</th><th>冲突类型</th><th>钩子等级</th></tr>
+<tr><td>EP-01</td><td>暗夜来客</td><td>超自然入侵</td><td>5 ⭐</td></tr>
+<tr><td>EP-02</td><td>紫痕之谜</td><td>身份谜团</td><td>4</td></tr>
+<tr><td>EP-03</td><td>名册碎片</td><td>信息争夺</td><td>4</td></tr>
+<tr><td>EP-04</td><td>血脉觉醒</td><td>情感对峙</td><td>5 ⭐</td></tr>
+</table>
+<p style="margin-top:8px;color:var(--dim)">付费墙：EP-03后 | 首集免费：EP-01</p>`
+  },
+  {
+    id: 2, title: "阶段2：人物", color: "blue",
+    subtitle: "全局阶段（只跑一次）— 角色外观规范",
+    inputs: ["outline.md"],
+    outputs: ["characters.md"],
+    prompt: `<span class="cmt">// 阶段2：人物设定 — workflow.md</span>
+
+<span class="fn">generate_characters</span>(outline):
+
+  <span class="kw">for each</span> 角色:
+    <span class="cmt">// base_prompt — AI生图的完整外观描述</span>
+    base_prompt:
+      - 风格关键词（如 <span class="str">"Gothic Korean manga style"</span>）
+      - 体型 + 肤色 + 发型/发色 + 瞳色
+      - 标志特征（如 <span class="str">"颈间紫色咬痕"</span>）
+
+    <span class="cmt">// outfits — 按剧情阶段分服装</span>
+    outfits:
+      - act_1: 初登场服装
+      - act_2: 中段变化
+      - act_3: 高潮/结局服装
+
+    <span class="cmt">// expressions — 情绪关键词</span>
+    expressions:
+      - neutral / angry / fearful / seductive / shocked ...
+
+    <span class="cmt">// 角色弧光 + 动机</span>
+    arc: 起点状态 → 转折事件 → 终点状态
+    motivation: 核心驱动力
+
+  → <span class="fn">write_file</span>(<span class="str">"characters.md"</span>)
+  → <span class="warn">⚠️ 人工确认</span>`,
+    outputPreview: `<h4>characters.md 片段 — Carmilla</h4>
+<code>base_prompt: "Gothic Korean manga style, pale skin, long wavy black hair, red eyes, black Victorian dress, delicate features, mysterious aura"</code><br><br>
+<code>outfits:</code><br>
+&nbsp;&nbsp;<code>act_1: "black Victorian dress, lace choker"</code><br>
+&nbsp;&nbsp;<code>act_2: "dark red gown, exposed shoulders"</code><br><br>
+<code>expressions: [neutral, seductive, menacing, vulnerable]</code><br>
+<code>arc: 神秘入侵者 → 矛盾情感暴露 → 牺牲救赎</code>`
+  },
+  {
+    id: 3, title: "阶段3：视觉资产", color: "blue",
+    subtitle: "全局阶段（只跑一次）— 参考图体系 + 服装/场景映射",
+    inputs: ["characters.md", "outline.md"],
+    outputs: ["manifest.md", "scene_prop_data.json"],
+    prompt: `<span class="cmt">// 阶段3：视觉资产 — reference-system.md</span>
+
+<span class="fn">generate_visual_assets</span>(characters, outline):
+
+  <span class="cmt">// manifest.md — 视觉规范手册</span>
+  manifest:
+    - 服装×场景映射表（哪个角色在哪个场景穿哪套）
+    - 表情关键词映射（角色×情绪→expression_key）
+    - 色调规则（按幕/按情绪：冷色/暖色/高对比）
+    - 光影规则（月光/烛光/闪电/雾气）
+    - 构图规则（竖屏9:16适配：正面≥80%，仰拍禁忌）
+
+  <span class="cmt">// scene_prop_data.json — 场景+道具参考图</span>
+  scene_prop_data:
+    scenes[]:
+      - id: <span class="str">"S-01"</span>
+      - name / cn_name
+      - prompt: <span class="str">"Gothic Korean manga style, 9:16 vertical,
+        wide establishing shot, no characters,
+        environmental scene reference, ..."</span>
+      - status: <span class="str">"pending"</span>
+
+    props[]:
+      - id: <span class="str">"P-01"</span>
+      - name / cn_name
+      - prompt: <span class="str">"Gothic Korean manga style,
+        close-up still life, no characters,
+        prop reference, ..."</span>
+      - status: <span class="str">"pending"</span>
+
+  → <span class="fn">write_file</span>(<span class="str">"manifest.md"</span>)
+  → <span class="fn">write_file</span>(<span class="str">"scene_prop_data.json"</span>)
+  → <span class="err">⚠️ 人工确认（关键！视觉一致性根基）</span>`,
+    outputPreview: `<h4>manifest.md 片段</h4>
+<table>
+<tr><th>角色</th><th>场景</th><th>Outfit</th><th>色调</th></tr>
+<tr><td>Carmilla</td><td>Laura卧室</td><td>act_1: black dress</td><td>冷色+烛光</td></tr>
+<tr><td>Laura</td><td>Laura卧室</td><td>act_1: nightgown</td><td>冷色+月光</td></tr>
+</table>
+<h4>scene_prop_data.json 片段</h4>
+<code>{"id":"S-01","name":"Laura卧室","cn_name":"Laura的卧室",<br>&nbsp;"prompt":"Gothic Korean manga style, 9:16 vertical, ...",<br>&nbsp;"status":"pending"}</code>`
+  },
+  {
+    id: 4, title: "阶段4：🔥逐集剧本", color: "red",
+    subtitle: "叙事层 — 唯一必须串行的阶段，叙事连续性不可妥协",
+    inputs: ["continuity.md", "outline.md", "上一集script结尾"],
+    outputs: ["script/EP-XX.md"],
+    prompt: `<span class="cmt">// 阶段4：叙事层 — 逐集剧本串行（v3.8 ⭐ 核心阶段）</span>
+
+<span class="kw">for</span> EP <span class="kw">in</span> [EP-01, EP-02, ..., EP-N]:  <span class="cmt">// 串行！不是并行！</span>
+
+  <span class="cmt">// Step 0: 读取上下文</span>
+  read(<span class="str">"continuity.md"</span>)  <span class="cmt">// 伏笔状态+角色状态+上集Cliffhanger</span>
+  read(<span class="str">"outline.md"</span>)[本集梗概]
+  read(上一集 <span class="str">"script/EP-XX.md"</span> 的结尾)
+
+  <span class="cmt">// Step 1: 编剧 → write_file</span>
+  必须遵守:
+    - <span class="ok">开篇3秒视觉奇观</span>（承接上集Cliffhanger）
+    - <span class="ok">首个冲突 < 15秒</span>
+    - <span class="ok">结尾 Cliffhanger</span> + 标注钩子类型+等级
+      格式: <span class="str">"Hook: [危险钩子(3) + 异常钩子(2)]"</span>
+    - <span class="ok">处理到期伏笔</span>（continuity.md中due_episode=当前集）
+    - <span class="ok">避免重复冲突模式</span>（与最近2集不同）
+    - <span class="ok">可以埋新伏笔</span>
+
+  <span class="cmt">// Step 2: Script-Aligner 审核</span>
+  → <span class="kw">if</span> FAIL: 重写 → 再审核（最多3轮，否则人工介入）
+
+  <span class="cmt">// Step 3: 更新 continuity.md</span>
+  记录: 新埋伏笔 + 回收伏笔 + 角色状态变化 + Cliffhanger
+
+  → 进入下一集
+
+<span class="warn">⚠️ 上一集未通过审核 → 不进入下一集</span>
+<span class="warn">⚠️ 全部剧本完成 → 人工确认/修改/定稿 → 进入阶段5</span>`,
+    outputPreview: `<h4>script/EP-01.md 结构</h4>
+<code>## Episode 1: 暗夜来客</code><br>
+<code>### Scene Breakdown</code><br>
+<code>### Key Dialogue</code><br>
+<code>### Voiceovers</code><br>
+<code>### Cliffhanger / 终局</code><br>
+<code>Hook: [危险钩子(3) + 异常钩子(2)]</code><br><br>
+<h4>串行必要性</h4>
+<p style="color:var(--dim)">同一Agent会话完整上下文记忆 → 精确承接悬念和情绪 → 伏笔追踪确保回收 → 冲突模式自然升级</p>`
+  },
+  {
+    id: 5, title: "Aligner审核", color: "red",
+    subtitle: "三视角定性 + 定量评分 + 导演覆盖机制",
+    inputs: ["script/EP-XX.md", "continuity.md"],
+    outputs: ["审核报告 (PASS/⚠️/FAIL)", "导演覆盖(可选)"],
+    prompt: `<span class="cmt">// Aligner 审核体系 — reviewers.md</span>
+
+<span class="cmt">// ━━ 第一层：三视角评审团（定性）━━</span>
+
+<span class="fn">急躁哥</span>(Impatient Bro):
+  关注: 节奏、爽点、反转
+  容忍度: 极低（没冲突就划走）
+  差评信号: 平铺没有冲突、结尾无悬念
+
+<span class="fn">逻辑控</span>(Logic Master):
+  关注: 逻辑、类型定位、差异化、世界观一致性
+  容忍度: 低（逻辑硬伤不可接受）
+  差评信号: 角色行为无动机、信息缺失
+
+<span class="fn">视听专家</span>(Visual Expert):
+  关注: AI制作可行性、视觉一致性、成本预估
+  容忍度: 中（关注技术实现）
+  差评信号: 场景过多、转场不自然、双人互动易翻车
+
+<span class="fn">编剧同行</span>(Writer Peer):  <span class="cmt">// v3.8 ⭐</span>
+  核心问题: <span class="str">"这个选择是有意为之还是无意出错？"</span>
+  不评分，只写 notes
+
+<span class="cmt">// ━━ 第二层：Script-Aligner（定量）━━</span>
+
+评分维度:
+  1. 叙事钩子     25%  (3秒钩子+结尾钩子+钩子等级达标)
+  2. 冲突密度     20%  (每30秒新信息+冲突升级)
+  3. 角色一致性   15%  (行为符合动机+外观与manifest一致)
+  4. 逻辑连贯     15%  (无硬伤+伏笔处理+跨集连续性)
+  5. 竖屏适配     15%  (正面≥80%+运镜可执行+场景成本)
+  6. 对白自然度   10%  (气泡音/骚讲话/爆炸式表达)
+
+类型权重动态调整（project_type影响各维度权重）
+
+<span class="cmt">// ━━ 导演覆盖机制 ━━</span>
+🟢 同意Aligner结果
+🟡 Aligner过严 → 放宽标准
+🔴 Aligner错误 → override + 记录理由`,
+    outputPreview: `<h4>Script-Aligner 评分示例</h4>
+<table>
+<tr><th>维度</th><th>权重</th><th>得分</th><th>结果</th></tr>
+<tr><td>叙事钩子</td><td>25%</td><td>22</td><td>✅</td></tr>
+<tr><td>冲突密度</td><td>20%</td><td>18</td><td>✅</td></tr>
+<tr><td>角色一致性</td><td>15%</td><td>13</td><td>✅</td></tr>
+<tr><td>逻辑连贯</td><td>15%</td><td>11</td><td>⚠️</td></tr>
+<tr><td>竖屏适配</td><td>15%</td><td>14</td><td>✅</td></tr>
+<tr><td>对白自然度</td><td>10%</td><td>8</td><td>✅</td></tr>
+<tr style="font-weight:700"><td>合计</td><td>100%</td><td>86</td><td style="color:var(--green)">PASS ✅</td></tr>
+</table>`
+  },
+  {
+    id: 6, title: "阶段5：批量分镜", color: "green",
+    subtitle: "制作层 — 剧本定稿后批量生成，2-3集合并最佳",
+    inputs: ["script/EP-XX.md", "characters.md", "manifest.md", "上一集分镜最后2镜"],
+    outputs: ["storyboard/EP-XX.md", "treatment/EP-XX.md"],
+    prompt: `<span class="cmt">// 阶段5：制作层 — 批量分镜（v3.8 ⭐）</span>
+<span class="cmt">// 前提：所有剧本已定稿！分镜间无叙事依赖</span>
+
+<span class="cmt">// ━━ 阶段5a：Director's Treatment ━━</span>
+<span class="kw">for each</span> EP:
+  <span class="fn">generate_treatment</span>(script, characters, manifest):
+    1页 (~500字):
+      - 视觉策略（色调/光影/构图方向）
+      - 情绪弧线（开→中→尾的情绪曲线）
+      - Hero Shots（本集2-3个标志性画面）
+      - 运镜策略（推/拉/跟拍/俯拍/过肩/固定）
+      - 节奏策略（慢推蓄力→静默→爆发→快切→钩子）
+  → <span class="warn">⚠️ 人工确认Treatment</span>
+
+<span class="cmt">// ━━ 阶段5b：执行分镜（2-3集合并）━━</span>
+<span class="fn">batch_generate_storyboards</span>([EP-01, EP-02, EP-03]):
+  <span class="cmt">// 写前必做</span>
+  read(script) → 分析集类型(恐怖/对峙/亲密/揭示/调查)
+    → 确定节奏/运镜/灯光策略
+
+  <span class="kw">for each</span> EP:
+    18镜 / 70秒:
+      每镜包含:
+        - 时间 (0:00-0:03)
+        - 景别 (特写/近景/中景/全景)
+        - 运镜 (推/拉/跟/俯/仰/固定/过肩)
+        - 画面描述
+        - 对白/VO
+        - 情绪标签
+    约束:
+      - <span class="ok">正面镜头 ≥ 80%</span>
+      - <span class="ok">运镜种类 ≥ 5种</span>
+      - <span class="ok">时长校验 = 70s</span>
+
+  → <span class="fn">Storyboard-Aligner</span> 批量审核
+  → FAIL集统一修改`,
+    outputPreview: `<h4>storyboard/EP-01.md 片段</h4>
+<table>
+<tr><th>#</th><th>Time</th><th>Shot</th><th>Camera</th><th>描述</th></tr>
+<tr><td>1</td><td>0:00-0:03</td><td>特写</td><td>固定</td><td>Laura颈间紫色咬痕发光</td></tr>
+<tr><td>2</td><td>0:03-0:06</td><td>中景</td><td>慢推</td><td>Laura惊恐触摸咬痕</td></tr>
+<tr><td>3</td><td>0:06-0:09</td><td>近景</td><td>固定</td><td>Carmilla在暗处微笑</td></tr>
+</table>
+<p style="margin-top:8px;color:var(--dim)">18镜/70s | 正面89% | 运镜7种 | ✅ PASS</p>`
+  },
+  {
+    id: 7, title: "阶段6：批量Prompts", color: "green",
+    subtitle: "制作层 — 分镜定稿后批量生成，必须用Reference体系",
+    inputs: ["storyboard/EP-XX.md", "reference-system.md", "manifest.md"],
+    outputs: ["prompts/EP-XX.md"],
+    prompt: `<span class="cmt">// 阶段6：制作层 — 批量 Prompts（v3.8 ⭐）</span>
+<span class="cmt">// 前提：所有分镜已定稿！2-3集合并最佳</span>
+
+<span class="fn">batch_generate_prompts</span>([EP-01, EP-02]):
+
+  <span class="kw">for each</span> EP:
+    <span class="cmt">// ━━ Visual Asset References ━━</span>
+    列出本集:
+      - 角色外观 (引用 characters.md 的 base_prompt)
+      - 场景列表 (引用 scene_prop_data.json 的场景ref)
+
+    <span class="cmt">// ━━ 每帧 Image Prompt ━━</span>
+    <span class="kw">for each</span> frame <span class="kw">in</span> storyboard:
+      格式:
+        <span class="str">[风格, 9:16 vertical, 景别,
+         [ref: C-XX],          // 角色参考图
+         outfit_key,           // 服装阶段key
+         expression_key,       // 情绪key
+         [ref: S-XX],          // 场景参考图
+         画面描述]</span>
+
+      <span class="err">⛔ 禁止内嵌角色描述！</span>必须用Reference体系
+      <span class="err">⛔ 禁止自创外观细节！</span>必须与manifest一致
+
+    <span class="cmt">// ━━ Shot Notes ━━</span>
+    每集末尾:
+      - 场景/色调/情感弧线
+      - 关键道具/服装注意
+      - 对白时间轴
+      - <span class="ok">时长校验行</span>（必须=70s）
+
+  → <span class="fn">Prompt-Aligner</span> 批量审核
+  → FAIL集统一修改
+  → <span class="warn">⚠️ 人工确认</span>`,
+    outputPreview: `<h4>prompts/EP-01.md 片段</h4>
+<code>## Visual Asset References</code><br>
+<code>C-01: Carmilla (base_prompt from characters.md)</code><br>
+<code>C-02: Laura (base_prompt from characters.md)</code><br>
+<code>S-01: Laura卧室 (scene ref from scene_prop_data.json)</code><br><br>
+<code>### Frame 1: 0:00-0:03 特写</code><br>
+<code>**Prompt:** Gothic Korean manga style, 9:16 vertical,<br>
+&nbsp;close-up, [ref: C-02], nightgown, fearful,<br>
+&nbsp;[ref: S-01], purple glowing bite mark on neck,<br>
+&nbsp;candlelight, cool tones</code>`
+  },
+  {
+    id: 8, title: "更新连续性", color: "purple",
+    subtitle: "每集完成后更新 continuity.md — 叙事记忆",
+    inputs: ["本集所有输出", "continuity.md(旧)"],
+    outputs: ["continuity.md(更新)"],
+    prompt: `<span class="cmt">// 更新 continuity.md — continuity.md</span>
+<span class="cmt">// 这是连接集与集之间的"叙事记忆"</span>
+
+<span class="fn">update_continuity</span>(current_ep_outputs, old_continuity):
+
+  <span class="cmt">// 1. 伏笔管理表</span>
+  新增本集埋下的伏笔:
+    | ID | 描述 | 埋入集 | 计划回收集 | 状态 |
+    | F-07 | xxx | EP-03 | EP-06 | 🔵 已埋 |
+
+  标记本集回收的伏笔:
+    F-01: 🟡 待回收 → ✅ 已回收
+
+  <span class="cmt">// 2. Last Cliffhanger</span>
+  记录本集结尾悬念 + 钩子类型/等级
+  标注下一集<span class="ok">必须承接</span>的内容
+
+  <span class="cmt">// 3. 角色状态</span>
+  更新因本集剧情变化的角色状态
+
+  <span class="cmt">// 4. 冲突模式记录</span>
+  记录本集冲突类型 → 供下一集参考（避免重复）
+  <span class="warn">⚠️ 下一集应避免与最近2集相同冲突类型</span>
+
+  <span class="cmt">// 5. 角色互动记录（v5.1 ⭐）</span>
+  记录: 互动角色 + 互动类型 + 情感基调
+
+  <span class="cmt">// 6. 感官刺激记录（v5.1 ⭐）</span>
+  记录: 视觉动作 + 物理亲密 + 超自然现象 + 危险场景
+  <span class="warn">⚠️ 连续低密度集 → Aligner扣分</span>
+
+<span class="cmt">// ━━ 上下文截断（EP-10+ 触发）━━</span>
+<span class="kw">if</span> continuity.md > 6000字符:
+  优先保留: 当前进度 + Last Cliffhanger + 未回收伏笔 + 角色状态
+  精简保留: 最近3集冲突模式
+  可截断: 已回收伏笔(只留摘要) + 5集前冲突模式`,
+    outputPreview: `<h4>continuity.md 更新示例</h4>
+<code>## 当前进度</code><br>
+<code>已完成: EP-01, EP-02, EP-03</code><br>
+<code>进行中: EP-04</code><br><br>
+<code>## 伏笔管理</code><br>
+<code>F-01: ✅ 已回收(EP-03) — 紫光与Carmilla的联系</code><br>
+<code>F-02: 🟡 待回收 — 父亲撕毁的名册(EP-06-07)</code><br>
+<code>F-07: 🔵 已埋 — Carmilla的真名(EP-05揭示)</code><br><br>
+<code>## Last Cliffhanger (EP-03)</code><br>
+<code>Hook: [信息钩子(3) + 危险钩子(4)]</code><br>
+<code>描述: 父亲撕毁名册关键页，Carmilla在门外听到一切</code>`
+  }
+];
+
+// Build sidebar
+const stepList = document.getElementById('stepList');
+STEPS.forEach(s => {
+  const li = document.createElement('li');
+  li.className = `step-item ${s.color}`;
+  li.dataset.step = s.id;
+  li.innerHTML = `<span class="step-num">${s.id}</span><span>${s.title}</span>`;
+  li.onclick = () => goStep(s.id);
+  stepList.appendChild(li);
+});
+
+let currentStep = -1;
+
+function goStep(id) {
+  currentStep = id;
+  const s = STEPS[id];
+
+  // Update sidebar
+  document.querySelectorAll('.step-item').forEach(el => {
+    el.classList.toggle('active', parseInt(el.dataset.step) === id);
+  });
+
+  // Update pipeline nodes
+  document.querySelectorAll('.pipe-node').forEach(el => {
+    el.classList.toggle('active', parseInt(el.dataset.step) === id);
+  });
+
+  // Render content
+  const area = document.getElementById('contentArea');
+  area.innerHTML = `
+    <h2>${s.title}</h2>
+    <p class="subtitle">${s.subtitle}</p>
+
+    <div class="info-grid">
+      <div class="info-card"><label>输入</label><span>${s.inputs.join(', ')}</span></div>
+      <div class="info-card"><label>输出</label><span>${s.outputs.join(', ')}</span></div>
+    </div>
+
+    <div class="prompt-section">
+      <h3>💻 运行的 Prompt</h3>
+      <div class="terminal">
+        <div class="terminal-header">
+          <span class="terminal-dot r"></span>
+          <span class="terminal-dot y"></span>
+          <span class="terminal-dot g"></span>
+          <span class="terminal-title">prompt — ${s.title}</span>
+        </div>
+        <button class="copy-btn" onclick="copyPrompt(${id})">复制</button>
+        <div class="terminal-body">${s.prompt}</div>
+      </div>
+    </div>
+
+    <div class="output-section">
+      <h3>📄 输出预览</h3>
+      <div class="output-box">${s.outputPreview}</div>
+    </div>
+  `;
+}
+
+function copyPrompt(id) {
+  const s = STEPS[id];
+  const temp = document.createElement('div');
+  temp.innerHTML = s.prompt;
+  const text = temp.textContent || temp.innerText;
+  navigator.clipboard.writeText(text).then(() => {
+    const btn = document.querySelector('.copy-btn');
+    btn.textContent = '已复制 ✓';
+    setTimeout(() => btn.textContent = '复制', 1500);
+  });
+}
+
+// Auto-show step 0
+goStep(0);
+</script>
+</body>
+</html>
