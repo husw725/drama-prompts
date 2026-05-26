@@ -1,7 +1,7 @@
 ---
 name: drama-team
 description: 短剧编剧全流程系统 — 叙事层串行+制作层批量分离+类型参数化+付费墙建模+模块化拆分，含剧集连续性追踪、伏笔管理、视觉一致性管控与独立审核机制
-version: 3.8
+version: 3.9
 author: Hermes Agent + User
 license: MIT
 metadata:
@@ -13,7 +13,7 @@ metadata:
 # Hermes Agent 短剧编剧团队 v3.8
 
 > 短剧编剧全流程系统：从小说/Idea到剧本、分镜、AI生图Prompt。
-> **v3.8**: 叙事层/制作层分离 + 类型参数化 + 付费墙建模 + 导演覆盖 + 模块化拆分
+> **v3.9**: 视觉连续性(visual_continuity.md) + 链式批量分镜 + 跨集视觉承接审核 + 类型DNA + 集定位/大纲承诺/叙事预算 + 关系动力学 + 骨架串行生成(提速30-40%) + 大纲承诺兑现审核 + continuity每3集批量更新
 
 ---
 
@@ -26,7 +26,7 @@ metadata:
 | [`parts/pitfalls.md`](parts/pitfalls.md) | ~130 | 踩坑记录+执行纪律+硬规则+子Agent策略 | 项目开始前必读；批量任务前复习 |
 | [`parts/architecture.md`](parts/architecture.md) | ~57 | 核心问题+解决方案架构+竖屏视觉语法+目录结构 | 新项目启动时；架构决策时 |
 | [`parts/workflow.md`](parts/workflow.md) | ~300 | 七阶段工作流+阶段4-6详细流程+批量执行纪律 | 每阶段开始前；执行纪律确认时 |
-| [`parts/continuity.md`](parts/continuity.md) | ~298 | continuity格式+付费墙+伏笔状态机+上下文管理+读者反馈+质量控制+回退机制 | 每集开始前/结束后；回退时 |
+| [`parts/continuity.md`](parts/continuity.md) | ~380 | continuity格式+visual_continuity格式+付费墙+伏笔状态机+角色物理状态+上下文管理+读者反馈+质量控制+回退机制 | 每集开始前/结束后；回退时 |
 | [`parts/reference-system.md`](parts/reference-system.md) | ~346 | 三文件架构+Reference体系+视觉资产+场景/道具/角色ref+Prompt注入规则+文件依赖图 | 阶段3视觉资产；写Prompts时 |
 | [`parts/reviewers.md`](parts/reviewers.md) | ~1012 | 审核员系统+三视角+三Aligner+类型权重+导演覆盖+集间衔接+大项目策略 | 每集审核时；审核不通过时 |
 | [`parts/templates.md`](parts/templates.md) | ~165 | 剧本模板+分镜模板+批量生产模式+检查清单 | 写剧本/分镜/Prompts时 |
@@ -78,7 +78,12 @@ metadata:
 | 机制 | 一句话 | 详见 |
 |------|--------|------|
 | **叙事层/制作层分离** | 剧本串行（叙事连续性），分镜/Prompts批量（无叙事依赖） | `parts/workflow.md` |
-| **continuity.md** | 伏笔状态机+角色状态+冲突模式+Last Cliffhanger | `parts/continuity.md` |
+| **visual_continuity.md** | 每集分镜完成后记录视觉状态快照，下集分镜/Prompts生成前必读 | `parts/continuity.md` |
+| **类型DNA** | 项目类型核心套路+冲突升级模式+钩子偏好+禁忌模式，大纲阶段提取 | `parts/reference-system.md` |
+| **集定位** | 每集战略定位（铺垫/转折/高潮/过渡/收束），大纲阶段规划 | `parts/reference-system.md` |
+| **关系动力学** | 关系转折点+权力动态+张力曲线，人物阶段建模 | `parts/reference-system.md` |
+| **全剧骨架** | 骨架串行生成→人工确认→剧本填充，提速30-40% | `parts/workflow.md` |
+| **continuity.md** | 伏笔状态机+角色状态+冲突模式+Last Cliffhanger+叙事预算 | `parts/continuity.md` |
 | **付费墙建模** | 首集免费+付费墙位置+免费/付费集策略差异+沉没成本曲线 | `parts/continuity.md` |
 | **Reference体系** | [ref: C-XX/S-XX/P-XX] 三重引用，改一处全局生效 | `parts/reference-system.md` |
 | **类型参数化** | Aligner权重按项目类型动态调整（甜宠/复仇/悬疑/玛丽苏/强制爱） | `parts/reviewers.md` |
@@ -129,3 +134,4 @@ project/
 | v3.6 | 叙事层/制作层分离 + 伏笔状态机 + AI瑕疵2026 + 文化雷区具体化 | 架构评估 |
 | v3.7 | 类型参数化 + 付费墙建模 + 导演覆盖 + 编剧视角 + Director's Treatment + 运镜分级 + 竖屏语法 | 好莱坞评估 |
 | v3.8 | 模块化拆分（SKILL.md→入口索引+9个parts子文件） | 生产部署 |
+| v3.9 | visual_continuity.md + 链式批量分镜 + 跨集视觉承接(10分) + 类型DNA + 集定位/大纲承诺/叙事预算 + 关系动力学 + 骨架串行生成 + 大纲承诺兑现(5分) + continuity每3集批量更新 | 创作者反馈"分镜连续性有问题"+"生成慢"驱动 |
