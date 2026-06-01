@@ -1,7 +1,7 @@
 ---
 name: drama-team
 description: 短剧编剧全流程系统 — 叙事层串行+制作层批量分离+类型参数化+付费墙建模+模块化拆分，含剧集连续性追踪、伏笔管理、视觉一致性管控与独立审核机制
-version: 3.9
+version: 4.1
 author: Hermes Agent + User
 license: MIT
 metadata:
@@ -10,10 +10,10 @@ metadata:
     related_skills: [hermes-agent, writing-plans, novel-to-short-drama-adaptation, short-drama-production-index]
 ---
 
-# Hermes Agent 短剧编剧团队 v3.8
+# Hermes Agent 短剧编剧团队 v4.1
 
 > 短剧编剧全流程系统：从小说/Idea到剧本、分镜、AI生图Prompt。
-> **v3.9**: 视觉连续性(visual_continuity.md) + 链式批量分镜 + 跨集视觉承接审核 + 类型DNA + 集定位/大纲承诺/叙事预算 + 关系动力学 + 骨架串行生成(提速30-40%) + 大纲承诺兑现审核 + continuity每3集批量更新
+> **v4.1**: Beat Engine(Hook→Friction→Spike→Button)+Premise-Driven Conflict+Dramatic Irony+对白=行动+付费墙3-7-21 Block分层 — 欧美爆款行业验证
 
 ---
 
@@ -82,7 +82,12 @@ metadata:
 | **类型DNA** | 项目类型核心套路+冲突升级模式+钩子偏好+禁忌模式，大纲阶段提取 | `parts/reference-system.md` |
 | **集定位** | 每集战略定位（铺垫/转折/高潮/过渡/收束），大纲阶段规划 | `parts/reference-system.md` |
 | **关系动力学** | 关系转折点+权力动态+张力曲线，人物阶段建模 | `parts/reference-system.md` |
-| **全剧骨架** | 骨架串行生成→人工确认→剧本填充，提速30-40% | `parts/workflow.md` |
+| **AI炫技防控** | 爆款第一原则：每秒都有情绪；合规但无聊=不及格 | `parts/pitfalls.md` |
+| **核心冲击力** | Script/Storyboard-Aligner最高权重维度(12分)：有让人"哇"的瞬间吗？ | `parts/reviewers.md` |
+| **Lighting分层精度** | 按集类型分层：氛围一层/标准两层/高潮三层，不过度工程化 | `parts/reviewers.md` |
+| **🟡运镜收紧** | 🟡≤2个/集+必须写理由，无理由=炫技扣分 | `parts/reviewers.md` |
+| **钩子简单性** | 能用单一的不用复合，能用低级的不用高级，复合是高潮集特权 | `parts/reviewers.md` |
+| **continuity精简** | 生成时只读3项核心（Last Cliffhanger+到期伏笔+角色状态） | `parts/workflow.md` |
 | **continuity.md** | 伏笔状态机+角色状态+冲突模式+Last Cliffhanger+叙事预算 | `parts/continuity.md` |
 | **付费墙建模** | 首集免费+付费墙位置+免费/付费集策略差异+沉没成本曲线 | `parts/continuity.md` |
 | **Reference体系** | [ref: C-XX/S-XX/P-XX] 三重引用，改一处全局生效 | `parts/reference-system.md` |
@@ -91,6 +96,12 @@ metadata:
 | **三视角+三Aligner** | 急躁哥/逻辑控/视听专家/编剧同行 × Script/Storyboard/Prompt-Aligner | `parts/reviewers.md` |
 | **运镜可执行性分级** | 🟢可靠/🟡有限/🔴赌博三级，AI遵循率实测 | `parts/reviewers.md` |
 | **竖屏视觉语法** | 纵向视线引导+画外空间叙事+文字叠加叙事+竖屏亲密空间 | `parts/architecture.md` |
+| **Beat Engine** | 每集按Hook→Friction→Spike→Button四段写，先写timestamp skeleton再写对白 | `parts/pitfalls.md` |
+| **Premise-Driven Conflict** | 冲突内建于设定（Enemies-to-lovers/Forbidden proximity/Power imbalance/Arranged circumstance） | `parts/pitfalls.md` |
+| **Dramatic Irony** | EP2-3建立观众信息优势，维持差距到付费墙后，比cliffhanger更强留存 | `parts/pitfalls.md` |
+| **对白=行动** | 每句对白推进冲突或压力下揭示角色，Subtext>Text，角色不解释感受 | `parts/pitfalls.md` |
+| **竖屏特写优先** | vertical drama lives in faces, not locations。特写/近景≥50% | `parts/reviewers.md` |
+| **声音/BGM** | 声音是海外用户付费第一驱动因素，BGM随Beat Engine节奏变化 | `parts/reviewers.md` |
 
 ---
 
@@ -135,3 +146,5 @@ project/
 | v3.7 | 类型参数化 + 付费墙建模 + 导演覆盖 + 编剧视角 + Director's Treatment + 运镜分级 + 竖屏语法 | 好莱坞评估 |
 | v3.8 | 模块化拆分（SKILL.md→入口索引+9个parts子文件） | 生产部署 |
 | v3.9 | visual_continuity.md + 链式批量分镜 + 跨集视觉承接(10分) + 类型DNA + 集定位/大纲承诺/叙事预算 + 关系动力学 + 骨架串行生成 + 大纲承诺兑现(5分) + continuity每3集批量更新 | 创作者反馈"分镜连续性有问题"+"生成慢"驱动 |
+| v4.0 | AI炫技防控+爆款核心原则+核心冲击力(12分)+Lighting分层精度+🟡运镜收紧(≤2+理由)+钩子简单性(防通胀)+continuity精简运行时(3项核心) | "合规但平庸"问题驱动——专业度和短剧节奏的张力 |
+| v4.1 | Beat Engine(Hook→Friction→Spike→Button四段结构)+Premise-Driven Conflict(4种爆款Premise)+Dramatic Irony(观众知道角色不知道)+对白=行动(Subtext>Text)+付费墙3-7-21 Block分层 | 欧美爆款行业验证——Filmustage/ReelShort/DramaBox收敛结论 |

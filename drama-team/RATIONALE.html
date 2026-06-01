@@ -1,0 +1,387 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>drama-team v4.1 规则原理可视化</title>
+<style>
+:root { --bg: #0f0f13; --card: #1a1a24; --border: #2a2a3a; --text: #e0e0e8; --dim: #8888a0; --accent: #ff6b6b; --green: #51cf66; --yellow: #ffd43b; --blue: #74c0fc; --purple: #b197fc; --orange: #ff922b; }
+* { margin: 0; padding: 0; box-sizing: border-box; }
+body { background: var(--bg); color: var(--text); font-family: -apple-system, 'SF Pro', 'Segoe UI', sans-serif; line-height: 1.6; }
+.header { padding: 40px 20px; text-align: center; border-bottom: 1px solid var(--border); }
+.header h1 { font-size: 28px; font-weight: 700; margin-bottom: 8px; }
+.header .sub { color: var(--dim); font-size: 14px; }
+.header .ver { display: inline-block; background: var(--accent); color: #fff; padding: 2px 10px; border-radius: 4px; font-size: 12px; font-weight: 600; margin-left: 8px; }
+.nav { display: flex; gap: 4px; padding: 16px 20px; overflow-x: auto; border-bottom: 1px solid var(--border); }
+.nav button { background: transparent; border: 1px solid var(--border); color: var(--dim); padding: 6px 14px; border-radius: 6px; font-size: 13px; cursor: pointer; white-space: nowrap; transition: all .2s; }
+.nav button:hover { border-color: var(--accent); color: var(--text); }
+.nav button.active { background: var(--accent); border-color: var(--accent); color: #fff; }
+.main { max-width: 1200px; margin: 0 auto; padding: 20px; }
+.section { display: none; }
+.section.active { display: block; }
+.section-title { font-size: 20px; font-weight: 700; margin-bottom: 20px; padding-bottom: 8px; border-bottom: 2px solid var(--accent); }
+.grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(340px, 1fr)); gap: 16px; margin-bottom: 30px; }
+.card { background: var(--card); border: 1px solid var(--border); border-radius: 10px; padding: 16px; transition: transform .2s; }
+.card:hover { transform: translateY(-2px); }
+.card .rule { font-size: 14px; font-weight: 600; margin-bottom: 8px; color: var(--green); }
+.card .why { font-size: 13px; color: var(--text); margin-bottom: 8px; }
+.card .meta { font-size: 11px; color: var(--dim); display: flex; gap: 8px; flex-wrap: wrap; }
+.card .meta span { background: rgba(255,255,255,.06); padding: 1px 6px; border-radius: 3px; }
+.card .fail { font-size: 12px; color: var(--accent); margin-top: 6px; padding-top: 6px; border-top: 1px solid var(--border); }
+.card .fail::before { content: '❌ 反例: '; font-weight: 600; }
+.score-table { width: 100%; border-collapse: collapse; margin-bottom: 30px; }
+.score-table th { text-align: left; padding: 8px 12px; background: rgba(255,255,255,.04); font-size: 13px; color: var(--dim); border-bottom: 1px solid var(--border); }
+.score-table td { padding: 8px 12px; font-size: 13px; border-bottom: 1px solid var(--border); }
+.score-table tr:hover { background: rgba(255,255,255,.02); }
+.score-table .dim-name { font-weight: 600; }
+.score-table .score { text-align: center; font-weight: 700; }
+.score-table .v-new { color: var(--accent); font-weight: 600; }
+.score-table .v-old { color: var(--dim); }
+.timeline { position: relative; padding-left: 24px; margin-bottom: 30px; }
+.timeline::before { content: ''; position: absolute; left: 8px; top: 0; bottom: 0; width: 2px; background: var(--border); }
+.tl-item { position: relative; margin-bottom: 20px; padding: 12px 16px; background: var(--card); border-radius: 8px; border: 1px solid var(--border); }
+.tl-item::before { content: ''; position: absolute; left: -20px; top: 16px; width: 10px; height: 10px; border-radius: 50%; background: var(--accent); }
+.tl-item .ver { font-size: 14px; font-weight: 700; color: var(--accent); }
+.tl-item .change { font-size: 13px; margin-top: 4px; }
+.tl-item .driver { font-size: 12px; color: var(--dim); margin-top: 4px; }
+.source-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 12px; margin-bottom: 30px; }
+.source-card { background: var(--card); border: 1px solid var(--border); border-radius: 8px; padding: 12px; }
+.source-card .name { font-size: 14px; font-weight: 600; color: var(--blue); margin-bottom: 4px; }
+.source-card .type { font-size: 11px; color: var(--dim); margin-bottom: 4px; }
+.source-card .data { font-size: 12px; }
+.source-card a { color: var(--purple); font-size: 11px; }
+.filter-bar { display: flex; gap: 8px; margin-bottom: 16px; flex-wrap: wrap; }
+.filter-bar button { background: transparent; border: 1px solid var(--border); color: var(--dim); padding: 4px 10px; border-radius: 4px; font-size: 12px; cursor: pointer; }
+.filter-bar button.active { background: var(--blue); border-color: var(--blue); color: #fff; }
+</style>
+</head>
+<body>
+
+<div class="header">
+  <h1>drama-team 规则原理可视化 <span class="ver">v4.1</span></h1>
+  <div class="sub">每条规则的来源、原因、行业验证和反例 — 升级迭代参考</div>
+</div>
+
+<div class="nav">
+  <button class="active" onclick="show('s1')">🔥 欧美爆款法则</button>
+  <button onclick="show('s2')">🛡️ AI炫技防控</button>
+  <button onclick="show('s3')">📝 串行生成</button>
+  <button onclick="show('s4')">📊 评分维度</button>
+  <button onclick="show('s5')">🎯 运镜分级</button>
+  <button onclick="show('s6')">🔗 连续性</button>
+  <button onclick="show('s7')">🪝 钩子体系</button>
+  <button onclick="show('s8')">⚙️ 其他规则</button>
+  <button onclick="show('s9')">📈 版本演进</button>
+  <button onclick="show('s10')">📚 数据源</button>
+</div>
+
+<div class="main">
+
+<!-- S1: 欧美爆款法则 -->
+<div class="section active" id="s1">
+  <div class="section-title">🔥 欧美爆款核心法则 (v4.1 最高优先级)</div>
+  <div class="filter-bar">
+    <button class="active" onclick="filterCards(this,'s1','all')">全部</button>
+    <button onclick="filterCards(this,'s1','beat')">Beat Engine</button>
+    <button onclick="filterCards(this,'s1','premise')">Premise</button>
+    <button onclick="filterCards(this,'s1','di')">Dramatic Irony</button>
+    <button onclick="filterCards(this,'s1','dialogue')">对白</button>
+    <button onclick="filterCards(this,'s1','screen')">竖屏</button>
+    <button onclick="filterCards(this,'s1','paywall')">付费墙</button>
+  </div>
+  <div class="grid" id="s1-grid">
+
+    <div class="card" data-tag="beat">
+      <div class="rule">Beat Engine: 每集按四段写</div>
+      <div class="why">均匀分布=没有节奏锚点，观众3秒没冲击就划走。四段结构让每秒都有明确任务。</div>
+      <div class="meta"><span>Filmustage 2026</span><span>ReelShort</span><span>Bound by Honor 373M</span></div>
+      <div class="fail">均匀节奏的短剧完播率暴跌</div>
+    </div>
+
+    <div class="card" data-tag="beat">
+      <div class="rule">Hook 0-15s = 引爆不是铺垫</div>
+      <div class="why">3秒定帧：陌生人不需要前情就能理解画面。中国制作方叫"爆炸点"。</div>
+      <div class="meta"><span>Filmustage 2026</span><span>The Double Life 500M</span></div>
+      <div class="fail">"她走进房间"→划走；"他掐住她的下巴"→继续看</div>
+    </div>
+
+    <div class="card" data-tag="beat">
+      <div class="rule">Friction 15-60s = 可拍摄冲突</div>
+      <div class="why">情绪暗示不可拍摄，画面没在干活。必须是物理/语言冲突在画面中。</div>
+      <div class="meta"><span>Filmustage 2026</span><span>行业原话</span></div>
+      <div class="fail">"气氛紧张"→画面没内容；"他把文件摔在桌上"→有动作</div>
+    </div>
+
+    <div class="card" data-tag="beat">
+      <div class="rule">Spike 60-90s = 静音测试</div>
+      <div class="why">如果静音后spike消失，那不是spike是音量。画面本身必须有冲击力。</div>
+      <div class="meta"><span>Filmustage 2026</span></div>
+      <div class="fail">依赖配乐爆发的"高潮"→静音后空洞</div>
+    </div>
+
+    <div class="card" data-tag="beat">
+      <div class="rule">Button 最后5-10s = 问题前切断</div>
+      <div class="why">比感觉安全早2秒切断，观众自己脑补比任何解释都有力。freeze-frame 55-58s留存率最高。</div>
+      <div class="meta"><span>ReelShort工程团队</span><span>Silver Fox精确到秒</span></div>
+      <div class="fail">"她惊恐地发现..."→解释太多；切在她睁大眼睛的瞬间→观众自己想</div>
+    </div>
+
+    <div class="card" data-tag="beat">
+      <div class="rule">先写timestamp skeleton再写对白</div>
+      <div class="why">结构先行语言后行。先定0:00点火→0:32首震→1:18冲击→1:50按钮，再写对白承载。</div>
+      <div class="meta"><span>Filmustage 2026</span></div>
+      <div class="fail">先写对白再塞结构→对白均匀分布无节奏</div>
+    </div>
+
+    <div class="card" data-tag="premise">
+      <div class="rule">冲突内建于设定，不是场景制造</div>
+      <div class="why">90秒一集没时间逐场制造障碍。设定本身产生冲突→93集不崩。</div>
+      <div class="meta"><span>Filmustage 2026</span><span>Bound by Honor 373M/93eps</span></div>
+      <div class="fail">场景驱动：每集临时加误会/谎言/巧合→10集后逻辑崩塌</div>
+    </div>
+
+    <div class="card" data-tag="premise">
+      <div class="rule">4种爆款Premise</div>
+      <div class="why">Enemies-to-lovers / Forbidden proximity / Power imbalance / Arranged circumstance — 这4种premise自动产生冲突。</div>
+      <div class="meta"><span>ReelShort/DramaBox 2025</span><span>3部500M+验证</span></div>
+      <div class="fail">普通爱情"两人相爱但有误会"→需要每集制造新误会</div>
+    </div>
+
+    <div class="card" data-tag="di">
+      <div class="rule">EP2-3建立观众信息优势</div>
+      <div class="why">观众知道角色不知道→看着角色做错误选择→恨看驱动算法存活。</div>
+      <div class="meta"><span>Filmustage 2026</span><span>Miss You After Goodbye 双平台#1</span></div>
+      <div class="fail">纯伏笔（编剧和观众同时发现）→没有"我知道她不知道"的张力</div>
+    </div>
+
+    <div class="card" data-tag="di">
+      <div class="rule">维持DI差距到付费墙后</div>
+      <div class="why">"她什么时候才发现"是付费驱动力。揭秘太早=付费动力消失。</div>
+      <div class="meta"><span>v4.1设计</span><span>Miss You After Goodbye</span></div>
+      <div class="fail">角色EP5就发现真相→后面15集没有DI驱动</div>
+    </div>
+
+    <div class="card" data-tag="dialogue">
+      <div class="rule">每句对白推进冲突或压力下揭示角色</div>
+      <div class="why">90秒一集，对白不干活=浪费秒数。这是唯一规则。</div>
+      <div class="meta"><span>Filmustage 2026</span></div>
+      <div class="fail">"I feel so betrayed"→删；"她把戒指扔进垃圾桶"→保留</div>
+    </div>
+
+    <div class="card" data-tag="dialogue">
+      <div class="rule">Subtext > Text</div>
+      <div class="why">没说的比说了的更有力。停顿/移开视线/答非所问→观众参与感更强。</div>
+      <div class="meta"><span>Filmustage 2026</span></div>
+      <div class="fail">"I love you but I can't"→直白；沉默+移开视线→更有力</div>
+    </div>
+
+    <div class="card" data-tag="dialogue">
+      <div class="rule">冲突前2行就进入</div>
+      <div class="why">竖屏观众拇指随时准备划走。3行铺垫=3秒浪费。</div>
+      <div class="meta"><span>Filmustage 2026</span></div>
+      <div class="fail">"Hi"→"How are you?"→"I'm fine"→冲突→已划走</div>
+    </div>
+
+    <div class="card" data-tag="screen">
+      <div class="rule">特写/近景≥50%，全景/中景≤30%</div>
+      <div class="why">"vertical drama lives in faces, not locations"。竖屏=脸的媒介，不是景的媒介。</div>
+      <div class="meta"><span>Filmustage 2026</span></div>
+      <div class="fail">30%全景→观众看不清脸→没有情绪连接</div>
+    </div>
+
+    <div class="card" data-tag="screen">
+      <div class="rule">核心情绪在面部微表情中传达</div>
+      <div class="why">微表情比任何布景都有冲击力，且AI生成更可靠。</div>
+      <div class="meta"><span>Silver Fox CPR场景TikTok病毒</span></div>
+      <div class="fail">依赖布景传达情绪→竖屏看不清+AI生成不稳定</div>
+    </div>
+
+    <div class="card" data-tag="paywall">
+      <div class="rule">Block1(EP1-3)免费+最强钩子</div>
+      <div class="why">首集=广告，Hook必须全季最炸。免费集目标是拉新+留存。</div>
+      <div class="meta"><span>ReelShort/DramaBox</span><span>>50%付费转化率</span></div>
+      <div class="fail">首集慢热铺垫→用户不付费因为没被hook</div>
+    </div>
+
+    <div class="card" data-tag="paywall">
+      <div class="rule">Block2(EP4-7)首次付费+沉没成本建立</div>
+      <div class="why">首次付费集的Spike="不看会亏"的信息重新定价。</div>
+      <div class="meta"><span>3-7-21 rule</span><span>Jenova AI</span></div>
+      <div class="fail">付费集和免费集无差异→没有付费理由</div>
+    </div>
+
+    <div class="card" data-tag="paywall">
+      <div class="rule">Block3(EP8-21)DI维持+允许更慢</div>
+      <div class="why">沉没成本锁住观众，可以更慢更深，但DI差距不能缩小。</div>
+      <div class="meta"><span>v4.1设计</span></div>
+      <div class="fail">Block3节奏和Block1一样快→观众疲劳</div>
+    </div>
+
+  </div>
+</div>
+
+<!-- S2: AI炫技防控 -->
+<div class="section" id="s2">
+  <div class="section-title">🛡️ AI炫技防控 (v4.0)</div>
+  <div class="grid">
+    <div class="card"><div class="rule">核心冲击力(12分)最高权重</div><div class="why">"合规但平庸"是AI最大问题。面面俱到但没有一个维度让人记住=不及格。</div><div class="meta"><span>v4.0</span><span>急躁哥反馈</span></div><div class="fail">每个维度都"正确"但没有"哇"→观众划走</div></div>
+    <div class="card"><div class="rule">🟡运镜≤2个/集+必须写理由</div><div class="why">AI倾向把🟡额度用完（"不用白不用"），但ReelShort爆款大量是固定+缓推。</div><div class="meta"><span>v4.0</span><span>ReelShort Top10</span></div><div class="fail">3个🟡运镜/集→画面不稳定+AI遵循率低</div></div>
+    <div class="card"><div class="rule">钩子简单性：能用单一的不用复合</div><div class="why">观众1秒内只能消化一个核心情绪。复合钩子=稀释冲击力。</div><div class="meta"><span>v4.0</span></div><div class="fail">日常集用复合钩子(10)→观众消化不了+通胀</div></div>
+    <div class="card"><div class="rule">Lighting按集类型分层精度</div><div class="why">3秒画面停留时间，观众只能消化1-2层光源信息。过度精度=浪费token+稀释冲击力。</div><div class="meta"><span>v4.0</span></div><div class="fail">氛围集写三层光源→AI花更多token在Lighting而非冲击力</div></div>
+    <div class="card"><div class="rule">continuity精简运行时(3项核心)</div><div class="why">AI花更多精力管理状态而非制造爽点=本末倒置。</div><div class="meta"><span>v4.0</span></div><div class="fail">读全量continuity→AI焦虑于伏笔管理→爽点密度下降</div></div>
+  </div>
+</div>
+
+<!-- S3: 串行生成 -->
+<div class="section" id="s3">
+  <div class="section-title">📝 叙事层串行 (v2.4-v3.8)</div>
+  <div class="grid">
+    <div class="card"><div class="rule">剧本必须逐集串行</div><div class="why">多子Agent并行→会话隔离+悬念丢失+角色状态漂移+伏笔无人回收+冲突模式重复。</div><div class="meta"><span>v2.4</span><span>Carmilla验证</span></div><div class="fail">并行生成12集→每集独立→连续性崩塌</div></div>
+    <div class="card"><div class="rule">分镜/Prompts可批量</div><div class="why">分镜间无叙事依赖，EP-03分镜不需要知道EP-02分镜，只需EP-03剧本。</div><div class="meta"><span>v3.8</span><span>54min→34min(~37%)</span></div><div class="fail">剧本也批量→连续性不可妥协</div></div>
+    <div class="card"><div class="rule">骨架串行+填充分离</div><div class="why">大纲已规划每集定位+承诺+预算，剧本可从"从零创作"变为"骨架填充"。</div><div class="meta"><span>v3.9</span></div><div class="fail">没有骨架→每集从零写→慢且连续性差</div></div>
+  </div>
+</div>
+
+<!-- S4: 评分维度 -->
+<div class="section" id="s4">
+  <div class="section-title">📊 三个Aligner评分维度对比</div>
+  <h3 style="font-size:16px;margin-bottom:12px;color:var(--blue)">Script-Aligner (15项 → 106分归一化100)</h3>
+  <table class="score-table">
+    <tr><th>维度</th><th>满分</th><th>版本</th><th>原因</th></tr>
+    <tr><td class="dim-name">核心冲击力</td><td class="score">12</td><td class="v-new">v4.0</td><td>合规但平庸=不及格</td></tr>
+    <tr><td class="dim-name">Beat Engine</td><td class="score">10</td><td class="v-new">v4.1</td><td>欧美爆款核心结构</td></tr>
+    <tr><td class="dim-name">开局钩子</td><td class="score">10</td><td class="v-old">v2.0</td><td>前2秒决定是否继续看</td></tr>
+    <tr><td class="dim-name">冲突强度</td><td class="score">12</td><td class="v-old">v2.0→v4.1</td><td>冲突是核心，加Premise自检</td></tr>
+    <tr><td class="dim-name">悬念钩子</td><td class="score">10</td><td class="v-old">v2.0→v4.0</td><td>cliffhanger=付费转化，加通胀检查</td></tr>
+    <tr><td class="dim-name">Dramatic Irony</td><td class="score">8</td><td class="v-new">v4.1</td><td>欧美最强留存机制</td></tr>
+    <tr><td class="dim-name">对白=行动</td><td class="score">8</td><td class="v-new">v4.1</td><td>欧美短剧铁律</td></tr>
+    <tr><td class="dim-name">人物弧光</td><td class="score">6</td><td class="v-old">v2.0→v4.1↓</td><td>角色成长线，v4.1降分</td></tr>
+    <tr><td class="dim-name">核心关系</td><td class="score">6</td><td class="v-old">v2.0→v4.1↓</td><td>核心关系卖点每集必须有</td></tr>
+    <tr><td class="dim-name">世界观逻辑</td><td class="score">6</td><td class="v-old">v2.0→v4.1↓</td><td>规则一致性</td></tr>
+    <tr><td class="dim-name">节奏/平台</td><td class="score">6</td><td class="v-old">v2.0→v4.1↓</td><td>V.O.配额+动作占比</td></tr>
+    <tr><td class="dim-name">文化敏感</td><td class="score">4</td><td class="v-old">v2.0→v4.1↓</td><td>区域雷区</td></tr>
+    <tr><td class="dim-name">信息密度</td><td class="score">2</td><td class="v-old">v2.0</td><td>≥2个新信息点/集</td></tr>
+    <tr><td class="dim-name">差异化</td><td class="score">2</td><td class="v-old">v2.0</td><td>避免Top3套路</td></tr>
+    <tr><td class="dim-name">大纲承诺兑现</td><td class="score">4</td><td class="v-old">v3.9</td><td>大纲承诺是否兑现</td></tr>
+  </table>
+
+  <h3 style="font-size:16px;margin-bottom:12px;color:var(--blue)">Storyboard-Aligner (10项 → 100分)</h3>
+  <table class="score-table">
+    <tr><th>维度</th><th>满分</th><th>版本</th><th>原因</th></tr>
+    <tr><td class="dim-name">核心冲击力</td><td class="score">12</td><td class="v-new">v4.0→v4.1</td><td>一镜让人"哇"</td></tr>
+    <tr><td class="dim-name">Beat Engine视觉</td><td class="score">12</td><td class="v-new">v4.1</td><td>视觉化四段结构</td></tr>
+    <tr><td class="dim-name">竖屏特写优先</td><td class="score">10</td><td class="v-new">v4.1</td><td>vertical drama lives in faces</td></tr>
+    <tr><td class="dim-name">节奏分层</td><td class="score">12</td><td class="v-old">v2.0→v4.1↓</td><td>张弛对比</td></tr>
+    <tr><td class="dim-name">运镜匹配度</td><td class="score">10</td><td class="v-old">v2.0→v4.1↓</td><td>运镜服务情绪+可执行性</td></tr>
+    <tr><td class="dim-name">景别层次</td><td class="score">10</td><td class="v-old">v2.0→v4.1↓</td><td>景别传达核心信息</td></tr>
+    <tr><td class="dim-name">时空切换</td><td class="score">8</td><td class="v-old">v2.0→v4.1↓</td><td>衔接三件套</td></tr>
+    <tr><td class="dim-name">AI指令颗粒度</td><td class="score">10</td><td class="v-old">v2.0→v4.1↓</td><td>AI可执行指令</td></tr>
+    <tr><td class="dim-name">情绪递进</td><td class="score">8</td><td class="v-old">v2.0→v4.1↓</td><td>镜头语言"看见"情绪</td></tr>
+    <tr><td class="dim-name">跨集视觉承接</td><td class="score">8</td><td class="v-old">v3.9→v4.1↓</td><td>上集结尾快照连续</td></tr>
+  </table>
+
+  <h3 style="font-size:16px;margin-bottom:12px;color:var(--blue)">Prompt-Aligner (7项 → 100分)</h3>
+  <table class="score-table">
+    <tr><th>维度</th><th>满分</th><th>版本</th><th>原因</th></tr>
+    <tr><td class="dim-name">角色外观一致性</td><td class="score">20</td><td class="v-old">v2.0→v4.1↓</td><td>manifest.md精确匹配</td></tr>
+    <tr><td class="dim-name">竖屏特写优先</td><td class="score">10</td><td class="v-new">v4.1</td><td>Prompt生成特写为主</td></tr>
+    <tr><td class="dim-name">场景还原度</td><td class="score">12</td><td class="v-old">v2.0→v4.1↓</td><td>9:16竖屏+氛围具体</td></tr>
+    <tr><td class="dim-name">特效指令明确性</td><td class="score">12</td><td class="v-old">v2.0→v4.1↓</td><td>位置/颜色/透明度精确</td></tr>
+    <tr><td class="dim-name">AI瑕疵规避</td><td class="score">15</td><td class="v-old">v2.0</td><td>2026常见坑</td></tr>
+    <tr><td class="dim-name">参考图利用</td><td class="score">15</td><td class="v-old">v2.0</td><td>--image权重+双人拆分</td></tr>
+    <tr><td class="dim-name">Prompt可执行性</td><td class="score">16</td><td class="v-old">v2.0→v4.1↑</td><td>语言/格式统一</td></tr>
+  </table>
+</div>
+
+<!-- S5-S10: 简略版 -->
+<div class="section" id="s5">
+  <div class="section-title">🎯 运镜分级</div>
+  <div class="grid">
+    <div class="card"><div class="rule">🟢可靠运镜≥60%</div><div class="why">AI遵循率>80%，稳定输出。static/slow_push/pan/tilt/top_down</div><div class="meta"><span>v3.8</span><span>Seedance验证</span></div><div class="fail">🟢<60%→画面不稳定</div></div>
+    <div class="card"><div class="rule">🟡有限运镜≤2个/集</div><div class="why">AI遵循率30-80%，每集≤2个+写理由。handheld/orbit/zoom/dolly</div><div class="meta"><span>v3.8→v4.0收紧</span></div><div class="fail">3个🟡/集→AI翻车率飙升</div></div>
+    <div class="card"><div class="rule">🔴赌博运镜≤1个/集</div><div class="why">AI遵循率<30%，需人工替代。whip_pan/crash_zoom/rack_focus</div><div class="meta"><span>v3.8</span></div><div class="fail">2个🔴/集→基本不可用</div></div>
+  </div>
+</div>
+
+<div class="section" id="s6">
+  <div class="section-title">🔗 跨集连续性</div>
+  <div class="grid">
+    <div class="card"><div class="rule">visual_continuity.md</div><div class="why">分镜连续性问题频发（色调跳变/角色位置跳变/服装不延续）</div><div class="meta"><span>v3.9</span><span>Carmilla v2</span></div><div class="fail">无continuity→每集独立→视觉风格漂移</div></div>
+    <div class="card"><div class="rule">链式批量分镜</div><div class="why">每批生成前读上一批尾集分镜+visual_continuity.md</div><div class="meta"><span>v3.9</span></div><div class="fail">不读→批量分镜风格漂移</div></div>
+    <div class="card"><div class="rule">跨集视觉承接(8分)</div><div class="why">前3镜与上集结尾快照连续</div><div class="meta"><span>v3.9→v4.1</span></div><div class="fail">不检查→角色位置/色调/服装无理由跳变</div></div>
+  </div>
+</div>
+
+<div class="section" id="s7">
+  <div class="section-title">🪝 钩子等级体系</div>
+  <div class="grid">
+    <div class="card"><div class="rule">10级钩子是词汇表不是公式</div><div class="why">编剧根据本集内容选最适配的钩子，不是按集数硬套等级。</div><div class="meta"><span>v3.5</span></div><div class="fail">"第5集必须5级钩子"→公式化→不匹配内容</div></div>
+    <div class="card"><div class="rule">钩子简单性原则</div><div class="why">观众1秒内只能消化一个核心情绪。</div><div class="meta"><span>v4.0</span></div><div class="fail">日常集用复合钩子→通胀+稀释</div></div>
+    <div class="card"><div class="rule">复合钩子是高潮集特权</div><div class="why">只有高潮/结局集信息密度够高，能支撑复合钩子。</div><div class="meta"><span>v4.0</span></div><div class="fail">铺垫集用复合钩子→观众消化不了</div></div>
+  </div>
+</div>
+
+<div class="section" id="s8">
+  <div class="section-title">⚙️ 其他关键规则</div>
+  <div class="grid">
+    <div class="card"><div class="rule">10+集批量先规划再执行</div><div class="why">用户原话："升级前你先计划一下会怎么用技能进行生成"</div><div class="meta"><span>v3.1</span><span>Carmilla v2</span></div><div class="fail">接到任务就跑→方式错+耗时长+质量差</div></div>
+    <div class="card"><div class="rule">审核不可跳过</div><div class="why">每集三件套完成后必须跑Aligner，≥80分才过。</div><div class="meta"><span>v2.6</span></div><div class="fail">跳过审核→质量无底线</div></div>
+    <div class="card"><div class="rule">导演覆盖≤5次/项目</div><div class="why">允许导演有意打破规则，但需写理由且有限额。</div><div class="meta"><span>v3.8</span></div><div class="fail">无限覆盖→规则形同虚设</div></div>
+    <div class="card"><div class="rule">Atmosphere写物理环境不写情绪</div><div class="why">Atmosphere是Lighting前置条件。"恐怖压抑"→Lighting无法推导光源；"深夜/雨/闪电"→可推理</div><div class="meta"><span>v3.3</span><span>导演纠正</span></div><div class="fail">"恐怖压抑"→Lighting不知道用什么光源</div></div>
+    <div class="card"><div class="rule">正面镜头≤35%</div><div class="why">正面镜头过多→视觉单调+AI生成重复</div><div class="meta"><span>Carmilla验证</span></div><div class="fail">EP-02 v1正面50%+→单调</div></div>
+    <div class="card"><div class="rule">对白12-15句/集</div><div class="why">超过15句→信息过载+节奏拖沓</div><div class="meta"><span>Carmilla验证</span></div><div class="fail">EP-02 v1有19句→压缩后节奏明显改善</div></div>
+  </div>
+</div>
+
+<div class="section" id="s9">
+  <div class="section-title">📈 版本演进驱动力</div>
+  <div class="timeline">
+    <div class="tl-item"><div class="ver">v2.0</div><div class="change">三视角+三Aligner审核体系</div><div class="driver">驱动力："AI写的短剧质量不稳定"</div></div>
+    <div class="tl-item"><div class="ver">v2.4</div><div class="change">按集串行不再并行</div><div class="driver">驱动力：多Agent并行→叙事断裂 | 项目：Carmilla</div></div>
+    <div class="tl-item"><div class="ver">v2.6</div><div class="change">审核不可跳过+子Agent限制</div><div class="driver">驱动力：子Agent跳过审核→质量无底线 | 项目：Lady Audley's Secret</div></div>
+    <div class="tl-item"><div class="ver">v3.1</div><div class="change">批量任务先规划再执行</div><div class="driver">驱动力："升级前你先计划一下" | 项目：Carmilla v2</div></div>
+    <div class="tl-item"><div class="ver">v3.5</div><div class="change">钩子10级体系</div><div class="driver">驱动力：结尾cliffhanger无类型标注</div></div>
+    <div class="tl-item"><div class="ver">v3.8</div><div class="change">叙事层与制作层分离+导演覆盖</div><div class="driver">驱动力：剧本修改不应级联重做分镜</div></div>
+    <div class="tl-item"><div class="ver">v3.9</div><div class="change">visual_continuity+链式批量+集定位+大纲承诺</div><div class="driver">驱动力："分镜连续性有问题"+"生成慢" | 项目：Carmilla v2</div></div>
+    <div class="tl-item"><div class="ver">v4.0</div><div class="change">AI炫技防控+核心冲击力+Lighting分层+运镜收紧+钩子简单性</div><div class="driver">驱动力："合规但平庸"——专业度和短剧节奏的张力</div></div>
+    <div class="tl-item"><div class="ver">v4.1</div><div class="change">Beat Engine+Premise-Driven Conflict+Dramatic Irony+对白=行动+3-7-21 Block+竖屏特写优先</div><div class="driver">驱动力：欧美爆款行业验证——Filmustage/ReelShort/DramaBox收敛结论</div></div>
+  </div>
+</div>
+
+<div class="section" id="s10">
+  <div class="section-title">📚 行业数据源</div>
+  <div class="source-grid">
+    <div class="source-card"><div class="name">Filmustage</div><div class="type">行业分析</div><div class="data">Beat Engine四段结构, 对白=行动, 竖屏=特写优先</div><a href="https://filmustage.com/blog/how-to-write-a-vertical-drama-script">filmustage.com</a></div>
+    <div class="source-card"><div class="name">ReelShort</div><div class="type">平台数据</div><div class="data">Bound by Honor 373M, Silver Fox 356M, Double Life 500M, >50%付费转化率</div><a href="https://www.reelshort.com">reelshort.com</a></div>
+    <div class="source-card"><div class="name">DramaBox</div><div class="type">平台数据</div><div class="data">Miss You After Goodbye 双平台#1</div></div>
+    <div class="source-card"><div class="name">Jenova AI</div><div class="type">AI工具</div><div class="data">3-7-21 rule, 3-15-30 structure, paywall-aware blocking</div><a href="https://www.jenova.ai/en/resources/microdrama-screenwriter-ai">jenova.ai</a></div>
+    <div class="source-card"><div class="name">CoGoLinks</div><div class="type">出海分析</div><div class="data">欧美3大爆款模板, 反转类点击率高42%</div><a href="https://www.cogolinks.com/news-center/serv/5849">cogolinks.com</a></div>
+    <div class="source-card"><div class="name">之桃影视/朱古力</div><div class="type">制片人</div><div class="data">越简单越受欢迎, 声音是付费驱动, 情感陪伴>剧情深度</div></div>
+    <div class="source-card"><div class="name">Sensor Tower</div><div class="type">市场数据</div><div class="data">$2.98B in-app purchases 2025, +115% YoY</div></div>
+    <div class="source-card"><div class="name">Omdia</div><div class="type">使用数据</div><div class="data">ReelShort US 35.7min/day > Netflix mobile 24.8min</div></div>
+    <div class="source-card"><div class="name">Real Reel</div><div class="type">行业分析</div><div class="data">Beat Engine Part 2: 十集脊柱+两个tentpole</div><a href="https://medium.com/real-reel/creative-insights-the-beat-engine-part-2-75b4d58bd6e0">medium.com/real-reel</a></div>
+    <div class="source-card"><div class="name">CBNData/壹娱观察</div><div class="type">国内分析</div><div class="data">短剧进入"辛苦钱"阶段, 同质化严重, 男频崛起</div></div>
+  </div>
+</div>
+
+</div>
+
+<script>
+function show(id) {
+  document.querySelectorAll('.section').forEach(s => s.classList.remove('active'));
+  document.querySelectorAll('.nav button').forEach(b => b.classList.remove('active'));
+  document.getElementById(id).classList.add('active');
+  event.target.classList.add('active');
+}
+function filterCards(btn, sectionId, tag) {
+  btn.parentElement.querySelectorAll('button').forEach(b => b.classList.remove('active'));
+  btn.classList.add('active');
+  const grid = document.getElementById(sectionId + '-grid');
+  grid.querySelectorAll('.card').forEach(c => {
+    if (tag === 'all' || c.dataset.tag === tag) c.style.display = '';
+    else c.style.display = 'none';
+  });
+}
+</script>
+</body>
+</html>

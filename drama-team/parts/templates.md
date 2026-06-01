@@ -5,6 +5,15 @@
 - **写后必做**：每集内联 Storyboard-Aligner 自审（6维度评分），≥80 分 PASS。
 - **详细实战模式**：见 `references/storyboard-bulk-generation-patterns.md`（集类型分类、运镜策略、节奏模式、常见扣分项）
 
+**v4.1 模板增强（Beat Engine + Premise + DI + 对白=行动）**：
+- **剧本模板**：每集开头必须写 Beat Engine Timestamp Skeleton（Hook/Friction/Spike/Button 四段时间+锚点）
+- **Premise 自检**：大纲阶段必须执行，确认冲突内建于设定而非场景制造
+- **Dramatic Irony 状态**：每集剧本标注观众信息优势（观众知道/角色不知道/差距维持）
+- **对白=行动**：每集剧本标注解释性对白数量（目标0），冲突前2行进入
+- **付费墙 Block**：每集标注当前 Block 策略（免费/付费/DI维持/揭秘）
+- **竖屏特写优先**：分镜/Prompts中特写/近景≥50%，核心情绪在面部微表情传达
+- **声音/BGM节奏**：BGM随Beat Engine变化（Hook引爆/Friction动作/Spike静音/Button骤停），SFX强化可拍摄动作
+
 **批量模式 vs 多 Agent 模式的选择：**
 | 场景 | 推荐方式 |
 |------|---------|
