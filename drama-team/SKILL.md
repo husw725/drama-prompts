@@ -21,38 +21,54 @@ metadata:
 ## 文件索引（按需加载 ⭐）
 
 > SKILL.md 从单文件拆分为模块化结构。AI 按阶段按需加载，避免一次性读取全部内容。
+> **速查**：先读 [`parts/quickstart.md`](parts/quickstart.md)（一页纸，告诉你每个阶段读哪些文件）
 
 | 文件 | 行数 | 内容 | 何时读取 |
 |------|------|------|---------|
-| [`parts/pitfalls.md`](parts/pitfalls.md) | ~130 | 踩坑记录+执行纪律+硬规则+子Agent策略 | 项目开始前必读；批量任务前复习 |
-| [`parts/architecture.md`](parts/architecture.md) | ~57 | 核心问题+解决方案架构+竖屏视觉语法+目录结构 | 新项目启动时；架构决策时 |
-| [`parts/workflow.md`](parts/workflow.md) | ~300 | 七阶段工作流+阶段4-6详细流程+批量执行纪律 | 每阶段开始前；执行纪律确认时 |
-| [`parts/continuity.md`](parts/continuity.md) | ~380 | continuity格式+visual_continuity格式+付费墙+伏笔状态机+角色物理状态+上下文管理+读者反馈+质量控制+回退机制 | 每集开始前/结束后；回退时 |
-| [`parts/reference-system.md`](parts/reference-system.md) | ~346 | 三文件架构+Reference体系+视觉资产+场景/道具/角色ref+Prompt注入规则+文件依赖图 | 阶段3视觉资产；写Prompts时 |
-| [`parts/reviewers.md`](parts/reviewers.md) | ~1012 | 审核员系统+十视角MFLIX Agent(01-10)+三Aligner+类型权重+导演覆盖+集间衔接+大项目策略 | 每集审核时；审核不通过时 |
-| [`parts/templates.md`](parts/templates.md) | ~165 | 剧本模板+分镜模板+批量生产模式+检查清单 | 写剧本/分镜/Prompts时 |
-| [`parts/ai-tools.md`](parts/ai-tools.md) | ~146 | AI工具限制速查表+Carmilla验证案例 | AI生图/生视频前；选工具时 |
-| [`parts/production.md`](parts/production.md) | ~194 | 工作台+generate_index+build_html+交付+注意事项+Drama Studio | 生成工作台时；交付时 |
+| [`parts/quickstart.md`](parts/quickstart.md) | ~94 | 一页纸速查卡：每阶段读哪些文件 + 核心规则速记 | **每次新session首先读取** |
+| [`parts/pitfalls.md`](parts/pitfalls.md) | ~148 | 执行纪律+硬规则+Beat Engine+Premise+DI+对白+炫技防控 | 项目开始前必读；批量任务前复习 |
+| [`parts/workflow.md`](parts/workflow.md) | ~145 | 七阶段工作流+骨架生成+链式批量+上下文读取规则 | 每阶段开始前 |
+| [`parts/continuity.md`](parts/continuity.md) | ~264 | continuity格式+visual_continuity格式+伏笔状态机+付费墙+回退+增量方案 | 每集开始前/结束后；回退时 |
+| [`parts/reviewers.md`](parts/reviewers.md) | ~15 | 审核系统索引（指向下面文件） | 选审核文件时 |
+| [`parts/reviewers-agents.md`](parts/reviewers-agents.md) | ~234 | 十视角Agent定义+人设+容忍度+国际化+激活策略+Industry Ground Truth | 选审核Agent时；审核前 |
+| [`parts/reviewers-aligners.md`](parts/reviewers-aligners.md) | ~30 | 审核系统文件索引（评分表+工作流拆分后） | 确认读取哪些文件时 |
+| [`parts/reviewers-scoring.md`](parts/reviewers-scoring.md) | ~450 | 三Aligner评分表+扣分规则+钩子等级表+运镜分级+评分校准（防膨胀） | 审核时；评分时 |
+| [`parts/reviewers-workflow.md`](parts/reviewers-workflow.md) | ~140 | 综合工作流+集间衔接检查+输出格式+Reviewer-Combo关系 | 写审核报告时；全剧审查时 |
+| [`parts/reviewers-patterns.md`](parts/reviewers-patterns.md) | ~212 | 创作法则+审核通过关键要素+常见陷阱+实战教训+示例 | 审核不通过时；项目开始前 |
+| [`parts/reference-system.md`](parts/reference-system.md) | ~508 | 三文件架构+Reference体系+视觉资产+场景/道具/角色ref+Prompt注入规则 | 阶段3视觉资产；写Prompts时 |
+| [`parts/reference-impl.md`](parts/reference-impl.md) | ~176 | 帧级Prompt批量注入+场景推断+时间匹配+批量脚本+迁移脚本 | 实现细节需要时（按需） |
+| [`parts/templates.md`](parts/templates.md) | ~162 | 剧本模板+分镜模板+Prompt模板 | 写剧本/分镜/Prompts时 |
+| [`parts/ai-tools.md`](parts/ai-tools.md) | ~120 | AI工具限制速查表+Carmilla验证案例 | AI生图/生视频前；选工具时 |
+| [`parts/production.md`](parts/production.md) | ~80 | 工作台+generate_index+build_html+交付+注意事项+Drama Studio | 生成工作台时；交付时 |
+| [`parts/architecture.md`](parts/architecture.md) | ~75 | 核心问题+解决方案架构+竖屏视觉语法+目录结构 | 新项目启动时；架构决策时 |
+| [`parts/decisions-log.md`](parts/decisions-log.md) | ~173 | 历史决策+踩坑记录(v2.4→v4.2) | 调试/回溯决策原因时（按需） |
 
 ---
 
 ## 快速开始
 
+> 💡 **新session第一步**：读 [`parts/quickstart.md`](parts/quickstart.md)（一页纸速查卡）
+
 ### 新项目启动（按顺序读取）
-1. 读 `parts/pitfalls.md` — 了解踩坑记录和硬规则（**必读**）
-2. 读 `parts/architecture.md` — 了解架构和目录结构
-3. 读 `parts/workflow.md` — 了解七阶段工作流
-4. 按阶段推进，每阶段开始前读对应文件（见上表）
+1. 读 `parts/quickstart.md` — 速查卡（**首先读**）
+2. 读 `parts/pitfalls.md` — 硬规则+爆款原则（**必读**）
+3. 读 `parts/workflow.md` — 七阶段工作流
+4. 读 `parts/architecture.md` — 架构和目录结构
+5. 按阶段推进，每阶段开始前读对应文件（见上表）
 
 ### 单集创作
-1. 读 `parts/continuity.md` → 读 `parts/templates.md` → 写剧本 → 读 `parts/reviewers.md` 跑审核
+1. 读 `parts/continuity.md` → 读 `parts/templates.md` → 写剧本 → 读 `parts/reviewers-agents.md` + `parts/reviewers-aligners.md` 跑**轻量审核**
 2. 写分镜 → 跑审核 → 写Prompts → 读 `parts/reference-system.md` 注入视觉资产 → 跑审核
-3. 更新 continuity.md
+3. 更新 continuity（增量delta或批量）
 
 ### 批量任务（分镜/Prompts）
-1. 读 `parts/workflow.md` 的"阶段5-6批量执行纪律"
+1. 读 `parts/pitfalls.md` 的批量执行纪律
 2. 读 `parts/ai-tools.md` 确认工具限制
 3. 输出执行计划 → 确认 → 执行
+
+### 全剧审查
+1. 读 `parts/reviewers-agents.md` + `parts/reviewers-aligners.md` + `parts/reviewers-patterns.md` 跑**全量审核**（10 Agent）
+2. 读 `parts/continuity.md` 的回退机制处理问题
 
 ---
 
@@ -94,7 +110,7 @@ metadata:
 | **Reference体系** | [ref: C-XX/S-XX/P-XX] 三重引用，改一处全局生效 | `parts/reference-system.md` |
 | **类型参数化** | Aligner权重按项目类型动态调整（甜宠/复仇/悬疑/玛丽苏/强制爱） | `parts/reviewers.md` |
 | **导演覆盖** | Green/Yellow/Red三色判定+导演override机制 | `parts/reviewers.md` |
-| **十视角+三Aligner** | Agent01-10(家庭主妇/工人/GenZ/高知/影评/制片/文化/付费墙/UA/亚文化) × Script/Storyboard/Prompt-Aligner | `parts/reviewers.md` |
+| **十视角+三Aligner** | 按剧类型动态选3人逐集审核(08付费墙固定)+全剧完成跑全量10人；Agent01-10 × Script/Storyboard/Prompt-Aligner | `parts/reviewers-scoring.md` + `parts/reviewers-workflow.md` |
 | **运镜可执行性分级** | 🟢可靠/🟡有限/🔴赌博三级，AI遵循率实测 | `parts/reviewers.md` |
 | **竖屏视觉语法** | 纵向视线引导+画外空间叙事+文字叠加叙事+竖屏亲密空间 | `parts/architecture.md` |
 | **Beat Engine** | 每集按Hook→Friction→Spike→Button四段写，先写timestamp skeleton再写对白 | `parts/pitfalls.md` |

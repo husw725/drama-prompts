@@ -11,7 +11,7 @@
 | **主编剧** (主 Agent) | 严格按集串行创作剧本、分镜、AI Prompts |
 | **视觉导演** (Visual Director) | 创建视觉资产清单，定义角色外观、服装、道具、场景的统一视觉规范 |
 | **Aligner 系统** | 按内容类型路由到专用审核员：Script-Aligner（剧本）、Storyboard-Aligner（分镜）、Prompt-Aligner（Prompts），返回 PASS/FAIL。详见本技能 `## 审核员系统（三视角定性 + 三Aligner定量）
-### 导演覆盖机制（v3.7 ⭐ 新增）
+### 导演覆盖机制
 
 > 当导演（用户）对 Aligner 评分有异议时，可启动覆盖机制。
 
@@ -39,7 +39,7 @@
 
 
 
-### 竖屏视觉语法（v3.8 ⭐ 新增）
+### 竖屏视觉语法
 
 > 竖屏不是"横屏裁剪"，它有独特的视觉语法和叙事逻辑。
 
@@ -52,25 +52,25 @@
 
 ```
 project/
-├── TASK.md                      # 任务进度跟踪
-├── outline.md                   # 故事大纲
-├── continuity.md                # 🔥 v2.4 剧集连续性追踪（伏笔/悬念/角色状态/交接记录）
+├── TASK.md # 任务进度跟踪
+├── outline.md # 故事大纲
+├── continuity.md # 🔥 v2.4 剧集连续性追踪（伏笔/悬念/角色状态/交接记录）
 ├── characters/
-│   └── characters.md            # 人物设定（性格、关系、动机、弧光）
+│ └── characters.md # 人物设定（性格、关系、动机、弧光）
 ├── visual_assets/
-│   └── manifest.md              # 视觉规则（服装指南、表情库、色调/光影/构图）
-├── scene_prop_data.json         # 场景/道具 Reference Prompts（AI生图参考图）
+│ └── manifest.md # 视觉规则（服装指南、表情库、色调/光影/构图）
+├── scene_prop_data.json # 场景/道具 Reference Prompts（AI生图参考图）
 ├── script/
-│   └── EP-XX.md                 # 各集剧本
+│ └── EP-XX.md # 各集剧本
 ├── treatment/
-│   └── EP-XX.md                 # 各集 Director's Treatment（v3.8 新增）
+│ └── EP-XX.md # 各集 Director's Treatment（v3.8 新增）
 ├── storyboard/
-│   └── EP-XX.md                 # 各集分镜
+│ └── EP-XX.md # 各集分镜
 ├── prompts/
-│   └── EP-XX.md                 # 各集 AI Prompts（含视觉资产注入）
-├── generate_index.py            # MD → JSON 解析脚本
-├── build_html.py                # JSON → SPA 工作台
-├── project_data.json            # 结构化数据（工作台数据源）
-├── index.html                   # 离线工作台页面
-└── script.progress.md           # 创作进度记录
+│ └── EP-XX.md # 各集 AI Prompts（含视觉资产注入）
+├── generate_index.py # MD → JSON 解析脚本
+├── build_html.py # JSON → SPA 工作台
+├── project_data.json # 结构化数据（工作台数据源）
+├── index.html # 离线工作台页面
+└── script.progress.md # 创作进度记录
 ```

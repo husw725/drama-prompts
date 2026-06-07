@@ -1,18 +1,11 @@
 
-**批量分镜最佳实践（v3.4 ⭐ 2026-05-15 Carmilla v2 验证）**：
+**批量分镜最佳实践**：
 - **2-3 集合并生成**：用户确认"后面可以尝试2集或3集合一起去生成"。主模型单次输出 20-30K chars 不中断，是最佳批量粒度。
 - **写前必做**：先读剧本 → 分析集类型(恐怖/对峙/亲密/揭示/调查) → 确定节奏/运镜/灯光策略 → 再生成。
 - **写后必做**：每集内联 Storyboard-Aligner 自审（6维度评分），≥80 分 PASS。
 - **详细实战模式**：见 `references/storyboard-bulk-generation-patterns.md`（集类型分类、运镜策略、节奏模式、常见扣分项）
 
-**v4.1 模板增强（Beat Engine + Premise + DI + 对白=行动）**：
-- **剧本模板**：每集开头必须写 Beat Engine Timestamp Skeleton（Hook/Friction/Spike/Button 四段时间+锚点）
-- **Premise 自检**：大纲阶段必须执行，确认冲突内建于设定而非场景制造
-- **Dramatic Irony 状态**：每集剧本标注观众信息优势（观众知道/角色不知道/差距维持）
-- **对白=行动**：每集剧本标注解释性对白数量（目标0），冲突前2行进入
-- **付费墙 Block**：每集标注当前 Block 策略（免费/付费/DI维持/揭秘）
-- **竖屏特写优先**：分镜/Prompts中特写/近景≥50%，核心情绪在面部微表情传达
-- **声音/BGM节奏**：BGM随Beat Engine变化（Hook引爆/Friction动作/Spike静音/Button骤停），SFX强化可拍摄动作
+**v4.1 模板增强**：剧本模板含 Beat Engine Skeleton + Premise自检 + DI状态 + 对白=行动标注 + 付费墙Block。详见 `pitfalls.md`
 
 **批量模式 vs 多 Agent 模式的选择：**
 | 场景 | 推荐方式 |
@@ -21,7 +14,7 @@
 | 单集精雕细琢 | delegate_task 独立审核员 |
 | **最佳实践** | 批量生成初稿 + 独立审核员逐集审 + 不通过就重写 |
 
-## 大规模批量生成检查清单 (v2.4 ⭐ 2026-04-30 Count of Monte Cristo 验证)
+## 大规模批量生成检查清单 
 
 > 当一次性生成 10+ 集时，必须执行以下步骤，否则会出现文件缺失（如 EP-20 prompts 漏写）。
 
@@ -31,11 +24,11 @@
 import os
 base = "/path/to/project"
 for i in range(1, 37):
-    ep = f"EP-{i:02d}"
-    for subdir in ["script", "storyboard", "prompts"]:
-        fp = f"{base}/{subdir}/{ep}.md"
-        if not os.path.exists(fp):
-            print(f"MISSING: {subdir}/{ep}.md")
+ ep = f"EP-{i:02d}"
+ for subdir in ["script", "storyboard", "prompts"]:
+ fp = f"{base}/{subdir}/{ep}.md"
+ if not os.path.exists(fp):
+ print(f"MISSING: {subdir}/{ep}.md")
 ```
 
 **分镜批量生成标准化参数（36集验证）：**
@@ -78,8 +71,8 @@ import json, os, re
 BASE = os.path.dirname(os.path.abspath(__file__))
 
 def read(path):
-    with open(os.path.join(BASE, path), 'r', encoding='utf-8') as f:
-        return f.read()
+ with open(os.path.join(BASE, path), 'r', encoding='utf-8') as f:
+ return f.read()
 
 # 解析函数：parse_script, parse_storyboard, parse_prompts, parse_characters, parse_manifest
 # 关键修复点：
@@ -89,32 +82,32 @@ def read(path):
 # 4. Voiceovers 初始化空列表，VO-only 集不会 KeyError
 
 def main():
-    data = {'project': 'ProjectName', 'total_episodes': 33, 'episodes': [], 'characters': [], 'manifest': {}, 'scenes': [], 'props': []}
-    
-    # 加载 manifest, scene_prop_data.json
-    if os.path.exists('visual_assets/manifest.md'):
-        data['manifest'] = parse_manifest(read('visual_assets/manifest.md'))
-    if os.path.exists('scene_prop_data.json'):
-        with open('scene_prop_data.json', 'r', encoding='utf-8') as f:
-            sp_data = json.load(f)
-        data['scenes'] = sp_data.get('scenes', [])
-        data['props'] = sp_data.get('props', [])
-    
-    # 遍历 script/ 目录，按 EP 解析三件套
-    script_dir = os.path.join(BASE, 'script')
-    for fname in sorted(os.listdir(script_dir)):
-        if not fname.endswith('.md'): continue
-        ep_id = fname.replace('.md', '')
-        episodes.append({
-            'id': ep_id, 'title': title,
-            'script': parse_script(read(f'script/{fname}')),
-            'storyboard': parse_storyboard(sb_md),
-            'prompts': parse_prompts(pr_md),
-        })
-    
-    # 输出 JSON
-    with open('project_data.json', 'w', encoding='utf-8') as f:
-        json.dump(data, f, ensure_ascii=False, indent=2)
+ data = {'project': 'ProjectName', 'total_episodes': 33, 'episodes': [], 'characters': [], 'manifest': {}, 'scenes': [], 'props': []}
+ 
+ # 加载 manifest, scene_prop_data.json
+ if os.path.exists('visual_assets/manifest.md'):
+ data['manifest'] = parse_manifest(read('visual_assets/manifest.md'))
+ if os.path.exists('scene_prop_data.json'):
+ with open('scene_prop_data.json', 'r', encoding='utf-8') as f:
+ sp_data = json.load(f)
+ data['scenes'] = sp_data.get('scenes', [])
+ data['props'] = sp_data.get('props', [])
+ 
+ # 遍历 script/ 目录，按 EP 解析三件套
+ script_dir = os.path.join(BASE, 'script')
+ for fname in sorted(os.listdir(script_dir)):
+ if not fname.endswith('.md'): continue
+ ep_id = fname.replace('.md', '')
+ episodes.append({
+ 'id': ep_id, 'title': title,
+ 'script': parse_script(read(f'script/{fname}')),
+ 'storyboard': parse_storyboard(sb_md),
+ 'prompts': parse_prompts(pr_md),
+ })
+ 
+ # 输出 JSON
+ with open('project_data.json', 'w', encoding='utf-8') as f:
+ json.dump(data, f, ensure_ascii=False, indent=2)
 ```
 
 **完整代码见模板**：`templates/generate_index.py`（含全部解析器实现 + 正则模式速查表）
@@ -133,7 +126,7 @@ python3 generate_index.py
 
 ```bash
 # 从 drama-prompts 复制 short-drama-production-index 到项目
-cp -r ~/.hermes/tasks/drama-prompts/short-drama-production-index/* /path/to/project/  # 同仓库下
+cp -r ~/.hermes/tasks/drama-prompts/short-drama-production-index/* /path/to/project/ # 同仓库下
 
 # 构建
 cd /path/to/project

@@ -8,13 +8,13 @@
 ## Carmilla
 - **base_prompt**: Gothic Korean manga style, 175cm tall vampire woman, pale skin, shoulder-length black wavy hair, amber eyes, fangs
 - **outfits**:
-  - **black_dress**: black Victorian gown with silver necklace
-  - **white_dress**: white silk evening gown
-  - **casual**: dark coat with leather boots
+ - **black_dress**: black Victorian gown with silver necklace
+ - **white_dress**: white silk evening gown
+ - **casual**: dark coat with leather boots
 - **expressions**:
-  - **fear**: dilated pupils, trembling lips, retreating
-  - **seductive**: half-lidded eyes, slight smirk, leaning forward
-  - **angry**: narrowed eyes, clenched jaw, glowing amber eyes
+ - **fear**: dilated pupils, trembling lips, retreating
+ - **seductive**: half-lidded eyes, slight smirk, leaning forward
+ - **angry**: narrowed eyes, clenched jaw, glowing amber eyes
 ```
 
 **Image Prompt 改造（角色部分）：**
@@ -37,14 +37,14 @@ a vampire woman looking in terror...
 
 ```json
 {
-  "frame": 1,
-  "time": "0-2s 特写",
-  "char_refs": ["C-01"],
-  "char_outfits": ["C-01:black_dress"],
-  "char_expressions": ["C-01:fear"],
-  "scene_ref": "S-01",
-  "prop_refs": ["P-01"],
-  "prompt": "Gothic Korean manga style, 9:16 vertical, close-up, [ref: C-01], black_dress, fear, [ref: S-01], ..."
+ "frame": 1,
+ "time": "0-2s 特写",
+ "char_refs": ["C-01"],
+ "char_outfits": ["C-01:black_dress"],
+ "char_expressions": ["C-01:fear"],
+ "scene_ref": "S-01",
+ "prop_refs": ["P-01"],
+ "prompt": "Gothic Korean manga style, 9:16 vertical, close-up, [ref: C-01], black_dress, fear, [ref: S-01], ..."
 }
 ```
 
@@ -99,21 +99,21 @@ a vampire woman looking in terror...
 > ⚠️ **v3.1 关键教训（Carmilla v1→v2 踩坑）**：
 > - **永远确认"分镜基于哪个剧本版本"** — v1 和 v2 可能完全不同（Carmilla v1 改了 1207 行，v2 只改了 37 行）。分镜如果基于 v1 生成，v2 来了要全部重来。
 > - **新版本剧本 → 用 `difflib.SequenceMatcher` 自动量化差异量**：
->   ```python
->   import re, difflib
->   # 新脚本按集拆分
->   ep_pattern = re.compile(r'^EPISODE (\d+):', re.MULTILINE)
->   ep_splits = list(ep_pattern.finditer(new_script))
->   for i, m in enumerate(ep_splits):
->       ep_num = int(m.group(1))
->       new_text = new_script[m.start():ep_splits[i+1].start() if i+1 < len(ep_splits) else len(new_script)]
->       old_text = open(f'script/EP-{ep_num:02d}.md').read()
->       ratio = difflib.SequenceMatcher(None, new_text, old_text).ratio()
->       if ratio < 0.7: print(f"EP-{ep_num:02d}: {ratio:.0%} → 需全量重写")
->       elif ratio < 0.95: print(f"EP-{ep_num:02d}: {ratio:.0%} → 增量修改")
->       else: print(f"EP-{ep_num:02d}: {ratio:.0%} → 无需修改")
->   ```
->   **经验值**：ratio < 70% → 全量重写分镜+Prompts；70-95% → 增量修改；>95% → 无需改动
+> ```python
+> import re, difflib
+> # 新脚本按集拆分
+> ep_pattern = re.compile(r'^EPISODE (\d+):', re.MULTILINE)
+> ep_splits = list(ep_pattern.finditer(new_script))
+> for i, m in enumerate(ep_splits):
+> ep_num = int(m.group(1))
+> new_text = new_script[m.start():ep_splits[i+1].start() if i+1 < len(ep_splits) else len(new_script)]
+> old_text = open(f'script/EP-{ep_num:02d}.md').read()
+> ratio = difflib.SequenceMatcher(None, new_text, old_text).ratio()
+> if ratio < 0.7: print(f"EP-{ep_num:02d}: {ratio:.0%} → 需全量重写")
+> elif ratio < 0.95: print(f"EP-{ep_num:02d}: {ratio:.0%} → 增量修改")
+> else: print(f"EP-{ep_num:02d}: {ratio:.0%} → 无需修改")
+> ```
+> **经验值**：ratio < 70% → 全量重写分镜+Prompts；70-95% → 增量修改；>95% → 无需改动
 > - **保留原始剧本**：`carmilla_full_text.txt`（原始）、`carmilla_modified.txt`（v1）、`carmilla_revised_v2.txt`（v2）都要保留，版本清晰。
 > - **Index 页面数据源跟着剧本版本走**：剧本换了，project_data.json 要重新生成，index.html 要重新 build。
 > - **影响范围判定**：剧本全换 → 分镜全换 → Prompts 全换；角色人设/Manifest/已生成图片可保留。
