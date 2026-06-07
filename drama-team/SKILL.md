@@ -1,7 +1,7 @@
 ---
 name: drama-team
 description: 短剧编剧全流程系统 — 叙事层串行+制作层批量分离+类型参数化+付费墙建模+模块化拆分，含剧集连续性追踪、伏笔管理、视觉一致性管控与独立审核机制
-version: 4.1
+version: 4.2
 author: Hermes Agent + User
 license: MIT
 metadata:
@@ -10,9 +10,10 @@ metadata:
     related_skills: [hermes-agent, writing-plans, novel-to-short-drama-adaptation, short-drama-production-index]
 ---
 
-# Hermes Agent 短剧编剧团队 v4.1
+# Hermes Agent 短剧编剧团队 v4.2
 
 > 短剧编剧全流程系统：从小说/Idea到剧本、分镜、AI生图Prompt。
+> **v4.2**: 十视角MFLIX Agent评审团(10个具象化人格) — 覆盖人口统计学+影视工业+跨文化合规+商业变现+亚文化考据，Agent激活策略按需调用
 > **v4.1**: Beat Engine(Hook→Friction→Spike→Button)+Premise-Driven Conflict+Dramatic Irony+对白=行动+付费墙3-7-21 Block分层 — 欧美爆款行业验证
 
 ---
@@ -28,7 +29,7 @@ metadata:
 | [`parts/workflow.md`](parts/workflow.md) | ~300 | 七阶段工作流+阶段4-6详细流程+批量执行纪律 | 每阶段开始前；执行纪律确认时 |
 | [`parts/continuity.md`](parts/continuity.md) | ~380 | continuity格式+visual_continuity格式+付费墙+伏笔状态机+角色物理状态+上下文管理+读者反馈+质量控制+回退机制 | 每集开始前/结束后；回退时 |
 | [`parts/reference-system.md`](parts/reference-system.md) | ~346 | 三文件架构+Reference体系+视觉资产+场景/道具/角色ref+Prompt注入规则+文件依赖图 | 阶段3视觉资产；写Prompts时 |
-| [`parts/reviewers.md`](parts/reviewers.md) | ~1012 | 审核员系统+三视角+三Aligner+类型权重+导演覆盖+集间衔接+大项目策略 | 每集审核时；审核不通过时 |
+| [`parts/reviewers.md`](parts/reviewers.md) | ~1012 | 审核员系统+十视角MFLIX Agent(01-10)+三Aligner+类型权重+导演覆盖+集间衔接+大项目策略 | 每集审核时；审核不通过时 |
 | [`parts/templates.md`](parts/templates.md) | ~165 | 剧本模板+分镜模板+批量生产模式+检查清单 | 写剧本/分镜/Prompts时 |
 | [`parts/ai-tools.md`](parts/ai-tools.md) | ~146 | AI工具限制速查表+Carmilla验证案例 | AI生图/生视频前；选工具时 |
 | [`parts/production.md`](parts/production.md) | ~194 | 工作台+generate_index+build_html+交付+注意事项+Drama Studio | 生成工作台时；交付时 |
@@ -93,7 +94,7 @@ metadata:
 | **Reference体系** | [ref: C-XX/S-XX/P-XX] 三重引用，改一处全局生效 | `parts/reference-system.md` |
 | **类型参数化** | Aligner权重按项目类型动态调整（甜宠/复仇/悬疑/玛丽苏/强制爱） | `parts/reviewers.md` |
 | **导演覆盖** | Green/Yellow/Red三色判定+导演override机制 | `parts/reviewers.md` |
-| **三视角+三Aligner** | 急躁哥/逻辑控/视听专家/编剧同行 × Script/Storyboard/Prompt-Aligner | `parts/reviewers.md` |
+| **十视角+三Aligner** | Agent01-10(家庭主妇/工人/GenZ/高知/影评/制片/文化/付费墙/UA/亚文化) × Script/Storyboard/Prompt-Aligner | `parts/reviewers.md` |
 | **运镜可执行性分级** | 🟢可靠/🟡有限/🔴赌博三级，AI遵循率实测 | `parts/reviewers.md` |
 | **竖屏视觉语法** | 纵向视线引导+画外空间叙事+文字叠加叙事+竖屏亲密空间 | `parts/architecture.md` |
 | **Beat Engine** | 每集按Hook→Friction→Spike→Button四段写，先写timestamp skeleton再写对白 | `parts/pitfalls.md` |
@@ -141,6 +142,7 @@ project/
 | v2.4 | 串行生成 + continuity.md | Lady Audley's Secret |
 | v2.5 | 上下文管理 + 质量回退 + 文件依赖 | 系统性补全 |
 | v3.0 | 三视角 + 三Aligner 审核系统 | — |
+| v4.2 | 十视角MFLIX Agent评审团(10个具象化人格) + Agent激活策略 + 商业变现维度(付费墙精算师/UA总监) + 亚文化考据维度 | 欧美出海短剧多Agent对抗模拟需求驱动 |
 | v3.5 | 主模型直接写硬规则 + 叙事钩子10级 | Carmilla v2 |
 | v3.6 | 叙事层/制作层分离 + 伏笔状态机 + AI瑕疵2026 + 文化雷区具体化 | 架构评估 |
 | v3.7 | 类型参数化 + 付费墙建模 + 导演覆盖 + 编剧视角 + Director's Treatment + 运镜分级 + 竖屏语法 | 好莱坞评估 |
