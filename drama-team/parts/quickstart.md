@@ -22,15 +22,18 @@
 2. **`ai-tools.md`** — AI工具限制速查（写前必查）
 3. **`templates.md`** — Prompt模板
 
-## 审核时读这3个文件
+## 审核时读这2个文件
 
-1. **`reviewers-agents.md`** — 选哪几个Agent（按剧类型）
-2. **`reviewers-scoring.md`** — 评分表 + 扣分规则 + 钩子等级表
-3. **`reviewers-workflow.md`** — 输出格式 + 综合工作流
+1. **`reviewers-scoring.md`** — Aligner评分表 + 扣分规则 + 钩子等级表
+2. **`reviewers-workflow.md`** — 输出格式 + 工作流
+
+## 关键集审核额外读1个文件
+
+1. **`reviewers-agents.md`** — 选观众旁白Agent（首集→GenZ，付费墙集→付费墙精算师）
 
 ## 审核不通过时读这1个文件
 
-1. **`reviewers-patterns.md`** — 创作法则 + 审核通过关键要素 + 常见陷阱 + 实战教训
+1. **`reviewers-patterns.md`** — 创作法则 + 审核通过关键要素 + 常见陷阱
 
 ---
 
@@ -55,12 +58,8 @@ Hook(0-15s) → Friction(15-60s) → Spike(60-90s) → Button(最后5-10s)
 特写/近景≥50%，全景/中景≤30%。vertical drama lives in faces, not locations.
 
 ### 付费墙 3-7-21
-| Block | 集数 | 策略 |
-|-------|------|------|
-| Block 1 | EP 1-3 | 免费，最强钩子 |
-| Block 2 | EP 4-7 | 首次付费，沉没成本 |
-| Block 3 | EP 8-21 | DI维持，允许更慢 |
-| Block 4 | EP 22+ | 揭秘区 |
+Block 1(EP1-3)免费最强钩子 → Block 2(EP4-7)首次付费 → Block 3(EP8-21)DI维持 → Block 4(EP22+)揭秘区
+详见 `continuity.md` 付费墙规划
 
 ### 炫技防控
 - 🟡运镜 ≤2个/集 + 必须写理由
@@ -81,15 +80,11 @@ Hook(0-15s) → Friction(15-60s) → Spike(60-90s) → Button(最后5-10s)
 
 ---
 
-## 审核Agent快速选择
+## 审核模式（v5.1 简化）
 
-| 剧类型 | 轻量3人 |
-|--------|---------|
-| 复仇 | 02工人 + 05影评 + 08付费墙 |
-| 强制爱 | 01主妇 + 04高知 + 08付费墙 |
-| 玛丽苏 | 01主妇 + 03GenZ + 08付费墙 |
-| 悬疑 | 05影评 + 10亚文化 + 08付费墙 |
-| 甜宠 | 01主妇 + 03GenZ + 08付费墙 |
-| 默认 | 01主妇 + 05影评 + 08付费墙 |
-
-**08付费墙始终入选**（商业底线不可妥协）
+| 场景 | 激活 | 说明 |
+|------|------|------|
+| 逐集常规 | 仅Aligner | Agent不参与 |
+| 首集 | Aligner + Agent 03 GenZ | 3秒完播率旁白 |
+| 付费墙集 | Aligner + Agent 08 付费墙 | 付费转化旁白 |
+| 全剧审查 | Aligner + 3个Agent旁白 | 主妇+付费墙+影评 |
