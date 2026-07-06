@@ -71,7 +71,7 @@
 # 【短剧审核报告】
 
 ## 评审信息
-- 目标市场：[欧美/日韩/国内/东南亚]
+- 目标市场：欧美（本技能唯一目标市场）
 - 评审类型：[剧本/分镜/Prompts/集间衔接]
 - 项目类型：[revenge/forced_love/sweet_romance/mary_sue/mystery/vampire]
 

@@ -85,6 +85,49 @@
 - 场景/道具改 → 只改 `scene_prop_data.json`
 - 服装/情绪/色调改 → 只改 `manifest.md`
 
+**收益**：角色外观只定义一次 → 全剧一致性；每张 frame prompt 省 ~50% token（去掉 80-120 词的角色重复描述）；改角色外观只需改一处。
+
+### 数据模型（`characters.md` 扩展）
+
+```markdown
+## Carmilla
+- **base_prompt**: Gothic Korean manga style, 175cm tall vampire woman, pale skin, shoulder-length black wavy hair, amber eyes, fangs
+- **outfits**:
+  - **black_dress**: black Victorian gown with silver necklace
+  - **white_dress**: white silk evening gown
+  - **casual**: dark coat with leather boots
+- **expressions**:
+  - **fear**: dilated pupils, trembling lips, retreating
+  - **seductive**: half-lidded eyes, slight smirk, leaning forward
+  - **angry**: narrowed eyes, clenched jaw, glowing amber eyes
+```
+
+**写法规则**：
+- `base_prompt`：风格 + 体型 + 肤色 + 发型发色 + 瞳色 + 标志性特征（尖牙、疤痕等）
+- `outfits`：按剧情阶段命名（如 `prison_uniform`、`evening_gown`），不含角色基本信息
+- `expressions`：情绪关键词组合（瞳孔 + 嘴唇 + 姿态）
+
+### Image Prompt 改造（角色部分）
+
+```
+改前（内嵌完整角色描述）：
+Gothic Korean manga style, 9:16 vertical, close-up,
+[Carmilla: pale skin, shoulder-length black wavy hair, amber eyes, fangs, black Victorian gown with silver necklace],
+scene: [Gothic Victorian bedroom...], a vampire woman looking in terror...
+
+改后（角色 ref + 服装 + 表情）：
+Gothic Korean manga style, 9:16 vertical, close-up,
+[ref: C-01], black_dress, fear, [ref: S-01],
+a vampire woman looking in terror...
+```
+
+**执行流程**：
+1. 为每个角色写 `base_prompt`（从现有 characters.md 外观描述精简）
+2. 梳理全剧服装归纳为 `outfits` 字典，表情关键词归纳为 `expressions` 字典
+3. 批量改造 prompts：`完整角色描述` → `[ref: C-XX], outfit_key, expression_key`
+4. 多角色同框：每个角色都用 `[ref: C-XX]` 格式
+5. 检查：每集 `[ref: C-XX]` 标记数 ≥ 出场角色数 × 帧数
+
 ---
 
 ## 常见陷阱
