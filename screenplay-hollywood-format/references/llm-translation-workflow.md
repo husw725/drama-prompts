@@ -35,6 +35,8 @@
 - `top_p: 0.9`
 - `timeout: 300` — **重要**：本地 LLM 处理长 prompt（中文剧本 + 翻译指令）需要 60-180s，120s 会超时
 
+> ⚠️ timeout/串行策略是**本地单机 LLM**（qwen 系列 sGLang/vLLM 单实例）的环境经验；云 API 可正常并发，无需 300s timeout。
+
 ### Prompt 优化
 
 **Prompt 要精简** — 不要堆叠 11 条规则 + 完整示例。经验：精简到 8 条规则 + 一行式角色映射 + 最小示例，能将每集翻译时间从 120s 降到 60s。
@@ -64,6 +66,30 @@ Translate:
 - `≥6 空格` + 普通文本 → Dialogue（左右缩进）
 - `INT./EXT.` 前缀 → Scene Heading（大写加粗）
 - `FADE/CUT/DISSOLVE` → Transition（右对齐加粗）
+
+### python-docx 排版通用代码
+
+东亚字体设置必须通过 `run._element` 操作 rPr（`p.element.rPr.rFonts.set(...)` 是错误 API，会报 `AttributeError`）：
+
+```python
+from docx.shared import Pt
+from docx.oxml.ns import qn
+from docx.oxml import OxmlElement
+
+def add_run_with_font(p, text, font_name='Courier New', font_size=12, bold=False):
+    run = p.add_run(text)
+    run.font.name = font_name
+    run.font.size = Pt(font_size)
+    run.bold = bold
+    # 正确设置东亚字体（避免 .element.rPr 报错）
+    r = run._element
+    rFonts = r.find(qn('w:rPr'))
+    if rFonts is None:
+        rFonts = OxmlElement('w:rPr')
+        r.insert(0, rFonts)
+    rFonts.set(qn('w:eastAsia'), font_name)
+    return run
+```
 
 ### 质量指标
 

@@ -8,7 +8,7 @@
 
 ### OpenClaw / 其他 Agent
 
-将对应目录的 `SKILL.md` 作为技能加载，或将 `prompt_template.txt` 内容作为 system prompt 传入。
+将对应目录的 `SKILL.md` 作为技能加载，或将其内容作为 system prompt 传入。
 
 ## 工具集
 
@@ -18,13 +18,11 @@
 
 ```
 drama-team/
-├── SKILL.md              # 全流程技能（含角色/剧本/分镜/Prompt 生成 + 审核）
-├── prompts/              # 子 Agent prompt（writer/aligner/recorder）
-├── templates/            # 模板文件（角色/剧集/大纲/视觉资产）
-├── references/           # 参考文档
-├── docs/                 # 使用文档
-├── examples/             # 示例项目
-└── scripts/              # 辅助脚本
+├── SKILL.md              # 全流程技能入口（含角色/剧本/分镜/Prompt 生成 + 审核）
+├── parts/                # 模块化拆分（workflow/reviewers/continuity/novel-adaptation 等）
+├── README.md
+├── RATIONALE.md          # 设计依据
+└── pipeline-viz.html     # 流程可视化
 ```
 
 **触发条件：** 用户需要从小说/大纲生成完整短剧剧本、分镜、AI Prompt。
@@ -35,8 +33,7 @@ drama-team/
 
 ```
 seedance-prompt-optimizer/
-├── SKILL.md              # 完整优化技能（11步流程 + 示例）
-└── prompt_template.txt   # 系统级 prompt（给任何 LLM 用）
+└── SKILL.md              # 完整优化技能（11步流程 + drama-team 衔接 + 示例）
 ```
 
 **触发条件：** 用户提供 draft prompt 需要优化为 Seedance 2.0 格式。
@@ -73,15 +70,9 @@ short-drama-production-index/
 drama-prompts/
 ├── drama-team/                    # 短剧编剧全流程
 │   ├── SKILL.md
-│   ├── prompts/
-│   ├── templates/
-│   ├── references/
-│   ├── docs/
-│   ├── examples/
-│   └── scripts/
+│   └── parts/
 ├── seedance-prompt-optimizer/     # Seedance Prompt 优化器
-│   ├── SKILL.md
-│   └── prompt_template.txt
+│   └── SKILL.md
 ├── screenplay-hollywood-format/   # 剧本好莱坞格式化
 │   ├── SKILL.md
 │   └── references/

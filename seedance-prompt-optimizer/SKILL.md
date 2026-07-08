@@ -1,13 +1,13 @@
 ---
 name: seedance-prompt-optimizer
 description: Use when optimizing draft prompts for Seedance 2.0 multimodal2video short drama generation. Transforms raw prompts into ByteDance official-compliant format with @image reference syntax, emotional body-signaling, and quality constraints.
-version: 1.0.0
+version: 1.1.0
 author: husw725
 license: MIT
 metadata:
   hermes:
     tags: [seedance, short-drama, prompt-optimization, video-generation, dreamina]
-    related_skills: [seedance2-short-drama-workflow]
+    related_skills: [drama-team, short-drama-production-index]
 ---
 
 # Seedance Prompt Optimizer
@@ -27,6 +27,17 @@ metadata:
 用户提供：
 1. 一个 draft prompt（可能中英文混杂，结构不完整）
 2. 传入的参考图列表（如：@图片1=Carmilla角色图, @图片2=Laura角色图, @图片3=场景图等）
+
+**批量模式**：输入是整集 prompts 文件（如 drama-team 的 `prompts/EP-XX.md`）时，对文件内每条 prompt 逐一应用 11 步，输出保持原文件的分节结构。
+
+## 输入来自 drama-team 时
+
+drama-team 的 `prompts/EP-XX.md` 用 `[ref: C-XX]` / `[ref: S-XX]` 引用体系 + 英文 `Shot [N]: [time_range]` 格式，需先做一次映射再走 11 步：
+
+1. **建立 ref → 参考图编号表**：对照项目 `manifest.md`，为本条 prompt 实际用到的每个 `[ref: C-XX]`（角色）和 `[ref: S-XX]`（场景）分配 `@图片N` 编号，角色图在前、场景图在后。
+2. **替换引用**：正文中 `[ref: C-01]` + 角色名 → `@图片N的角色名`；`[ref: S-XX]` → 对应场景图声明。
+3. **时序格式**：`Shot [N]: [X-Ys]` → `镜头N（X-Y秒）`（即 Step 3 的规则）。
+4. **外观描述**：drama-team prompt 中逐字复制的角色外观描述按 Step 2 删除——参考图已锁定外观，只保留 characters.md 之外的剧情新增特征。
 
 ## Optimization Steps (11 步逐一执行)
 
@@ -58,6 +69,7 @@ metadata:
 - `[0-3s]` → `镜头1（0-3秒）`
 - `[3-6s]` → `镜头2（3-6秒）`
 - 时长用中文"秒"，不用英文"s"
+- **时间缺口补镜头**：draft 时间段之间有缺口时（如 `[0-4s]` 直接跳 `[8-12s]`），按前后镜头的动作逻辑补一个过渡镜头填满缺口（如角色从门口走到床边的移动过程），保证时间轴连续、每个时间段都有明确的人物动作
 
 ### Step 4: 情绪外化为身体信号
 
