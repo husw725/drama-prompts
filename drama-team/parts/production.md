@@ -33,6 +33,19 @@ for i in range(1, TOTAL_EPS + 1):
 - ✅ 标记完成的集 + 更新项目状态（如 "Phase 2 全部完成"）+ 添加更新日志条目
 - 不更新会导致下次续做时无法判断真实进度
 
+**TASK.md 章节契约**（全仓库唯一格式定义，各处写入方按此归位）：
+
+```markdown
+# TASK.md
+## 进度表          ← 各阶段/各集完成状态（批量生成后更新，本节）
+## 伏笔告警        ← 逾期伏笔检查输出（continuity.md 检查脚本写入）
+## Override 记录   ← 导演覆盖 Aligner 判定的理由（reviewers-scoring.md 覆盖机制写入）
+## 回退记录        ← 回退链执行标记（continuity.md 回退机制写入）
+## Style Guide     ← 从编剧修订学到的风格规则（revision-workflows.md 写入）
+## 更新日志        ← 每次批量操作一行
+```
+> 进度的最终真相仍以 `ls script/ storyboard/ prompts/` + 文件实际存在为准，TASK.md 是索引不是证据。
+
 ---
 
 ## 工作台生成（三步）
@@ -80,17 +93,20 @@ def main():
         json.dump(data, f, ensure_ascii=False, indent=2)
 ```
 
-**正则解析模式速查表**（与 `parts/templates.md` 的 ⚓ 锚点逐一对应）：
+**⚓ 锚点两级契约**（与 `parts/templates.md` 对应）：
+
+**第一级：正则解析锚（不可改，改了工作台静默丢数据）**
 
 | 解析目标 | 正则锚点 |
 |----------|---------|
 | 场景分解 | `## Scene Breakdown\n(.+?)(?=\n## [^#]|\Z)` |
-| Key Dialogue | `## Key Dialogue\n(.+?)(?=\n## [^#]|\Z)` |
 | 分镜表 (Key Frames) | `## Key Frames\n(.+?)(?=\n## [^#]|\Z)` |
 | Image Prompts | `### Frame (\d+): (.+?)\n\*\*Prompt:\*\*(.*?)` |
 | Video Prompts | `### Shot (\d+): (.+?)\n\*\*Prompt:\*\*(.*?)` |
 
-> ⭐ **数据提取原则**：剧本对白/VO/Cliffhanger 等复杂结构化数据 → **主模型逐集精读提取**，不用正则。规则格式（分镜 Markdown 表格、manifest 表格）→ 正则脚本。
+**第二级：LLM 提取锚（Key Dialogue / Voiceovers / Cliffhanger）**——由主模型逐集精读提取（对白/VO/Cliffhanger 结构太活，正则不可靠），标题保持稳定即可，不是解析器契约。
+
+> ⭐ **数据提取原则**：复杂结构化数据（对白/VO/Cliffhanger）→ 主模型精读；规则格式（分镜表格、manifest 表格）→ 正则脚本。
 
 ### Step 2-3: 构建工作台
 
@@ -131,7 +147,7 @@ tar --exclude='__pycache__' -czf /path/to/desktop/project-name.tar.gz -C /path/t
 ## 注意事项
 
 1. **AI 审核局限** — Aligner 可能对"格式正确但创意平庸"给 PASS，必须人工最终把关
-2. **昂贵审核循环** — 同一问题反复 FAIL 超过2-3次时立即人工介入
+2. **昂贵审核循环** — 同一问题最多3轮，第3轮仍FAIL立即人工介入（与 workflow.md 阶段4 一致）
 3. **记忆污染** — 手动修改文档后需更新 `script.progress.md`
 4. **风格漂移** — 长对话后定期重申创作法则
 

@@ -59,6 +59,9 @@
 ```markdown
 ## 类型DNA
 - **项目类型**: revenge（复仇）
+- **单集时长 (ep_duration)**: 90s（项目启动时问用户，未指定则默认 90s；全流程时间预算/校验以此为准）
+- **总集数**: 60（商业规格 50-80 集；12/24 仅作 Demo/试水）
+- **首个付费集 (paywall_ep)**: EP-08（项目启动时问用户，默认 EP-08；付费墙 Block、Spike 重定价集、Agent 08 激活均引用此值）
 - **核心套路**: 三段式复仇（受辱→蛰伏→逐一打脸）+ 身份反转 + 不可逆代价
 - **冲突升级模式**: 口头羞辱 → 肢体冲突 → 社会性死亡 → 生死对决
 - **钩子偏好**: 危险钩子(3) + 不可逆钩子(7) + 后果链钩子(9)（复仇型偏高位钩子）
@@ -172,7 +175,7 @@ for EP:
  1. 读 continuity.md + outline.md(集定位+类型DNA) + characters.md(关系动力学)
  2. 读 上一集骨架结尾（保证连续性）
  3. 生成骨架 → skeleton/EP-XX.md
- 4. 更新 skeleton_continuity.md
+ 4. 更新 skeleton_continuity.md（格式：每集两行——Cliffhanger + 伏笔操作）
  → 下一集
 ✅ 全部骨架 → 人工确认 → 阶段4b
 ```
@@ -204,8 +207,8 @@ for EP:
  - 检查：回收上集Cliffhanger？处理到期伏笔？冲突模式不重复？
  - FAIL → 重写 → 最多3轮，否则人工介入
 
- Step 3: 更新continuity.md（每3集批量更新，前3集逐集）
- ⚠️ 逾期/到期伏笔必须每集检查
+ Step 3: 更新continuity.md（每集必更核心三项：Cliffhanger/伏笔操作/角色状态；全文件整理压缩每3集一次）
+ ⚠️ 逾期/到期伏笔必须每集检查（检查依赖核心三项为最新——这是每集必更的原因）
 ```
 
 ---
@@ -230,6 +233,8 @@ for EP:
 - 第N批：读上一批尾集分镜 + visual_continuity.md + Treatment
 
 → Storyboard-Aligner批量审核 → FAIL集统一修改 → **每集分镜完成后立即更新 visual_continuity.md** → 人工确认
+
+**⚠️ FAIL 重写级联（硬规则）**：FAIL 集重写后，①重新更新该集结尾视觉快照 ②对其**后一集**重跑"跨集视觉承接"检查（仅 Storyboard-Aligner 维度9）——后一集是基于旧快照生成的，快照变了必须复检。
 
 **⚠️ visual_continuity.md 更新节奏（硬规则）**：
 - **每集分镜完成后立即更新**，不是批量结束后才更新
@@ -264,6 +269,9 @@ for EP:
 > 改了哪个文件需要同步更新哪些，按此图判断。
 
 ```
+adaptation-map.md（小说改编项目）
+ └──→ outline.md（阶段1取材依据；Aligner"大纲承诺兑现"引用）
+
 outline.md
  ├──→ characters.md（依赖大纲中的角色）
  │     ├──→ visual_assets/manifest.md（依赖角色设定）
@@ -280,20 +288,30 @@ scene_prop_data.json
  └──→ prompts/EP-XX.md（依赖场景/道具 Reference）
 
 script/EP-XX.md
+ ├──→ treatment/EP-XX.md（Director's Treatment 依赖剧本）
  ├──→ storyboard/EP-XX.md（依赖剧本内容）
  └──→ prompts/EP-XX.md（依赖剧本场景）
 
 storyboard/EP-XX.md
+ ├──→ visual_continuity.md（每集分镜完成后立即写入结尾快照）
  └──→ prompts/EP-XX.md（依赖分镜镜头）
+
+visual_continuity.md
+ ├──→ 下一集/下一批 storyboard/EP-XX.md（生成前必读）
+ └──→ prompts/EP-XX.md（注入上集结尾快照）
+
+TASK.md ←── 各阶段写入进度/伏笔告警/Override记录（格式契约见 parts/production.md）
 ```
 
 **文件变更联动规则：**
 
 | 修改了 | 必须同步更新 | 可选更新 |
 |--------|-------------|---------|
+| adaptation-map.md | outline.md（取材映射变化） | 无 |
 | outline.md | continuity.md（伏笔规划） | characters.md（如果角色有变化） |
 | characters.md | manifest.md（服装/表情） | scene_prop_data.json（如果新角色有新场景） |
 | manifest.md | prompts/EP-XX.md | 无 |
-| script/EP-XX.md | storyboard/EP-XX.md, prompts/EP-XX.md, continuity.md | 无 |
-| storyboard/EP-XX.md | prompts/EP-XX.md | 无 |
+| script/EP-XX.md | storyboard/EP-XX.md, prompts/EP-XX.md, continuity.md, treatment/EP-XX.md | 无 |
+| storyboard/EP-XX.md | **visual_continuity.md（该集结尾快照）**, prompts/EP-XX.md | 无 |
 | continuity.md | 下一集的 script/EP-XX.md | 无 |
+| visual_continuity.md | 下一集的 storyboard/EP-XX.md, prompts/EP-XX.md | 无 |

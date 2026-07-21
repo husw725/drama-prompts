@@ -30,11 +30,13 @@
 |------|-----------|------|
 | **逐集常规审核** | 无 | Aligner 独立评分，足够 |
 | **首集** | Agent 03 GenZ | 3秒完播率是首集生死线，口语化反馈最有价值 |
-| **付费墙集（EP8/EP10）** | Agent 08 付费墙精算师 | 付费转化是商业底线，需要冷酷数据视角的口语化判断 |
+| **付费墙集（paywall_ep 前后各1集，默认EP7-9）** | Agent 08 付费墙精算师 | 付费转化是商业底线，需要冷酷数据视角的口语化判断 |
 | **全剧审查** | Agent 01 主妇 + Agent 08 付费墙 + Agent 05 影评 | 情绪+商业+逻辑三个最关键视角 |
 | **超自然题材全剧** | + Agent 10 亚文化死忠 | 世界观考据是垂直赛道命门 |
 
 **不再按 project_type 动态选人**——逐集不激活，关键节点固定选最有价值的1-3个。
+**其余 Agent（02/04/06/07/09）不自动激活**，导演可按需点名：如投流素材评估用 09、女性意识存疑集用 04、法务合规疑虑用 06。
+> 本表是激活规则的**唯一出处**（quickstart / reviewers-workflow 均指向此处）。
 
 ---
 
@@ -129,7 +131,7 @@
 - Beat Engine 是欧美爆款核心结构（Filmustage 2026）
 - Premise-Driven Conflict > 场景驱动冲突（Bound by Honor 373M views）
 - Dramatic Irony 是最强留存机制（Miss You After Goodbye 双平台#1）
-- 3-7-21 付费墙 Block 分层（ReelShort/DramaBox 2025）
+- 付费墙卡点：免费 5-10 集、首卡点 EP6-8（ReelShort/DramaBox 行业实际）
 - 竖屏=特写优先（Filmustage 2026）
 - Cliffhanger 写到秒（ReelShort工程团队）
 

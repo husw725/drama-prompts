@@ -9,11 +9,12 @@
 > 2026-04-30 Count of Monte Cristo 项目验证。当用户直接提供好莱坞格式剧本（非小说）：
 
 1. 解析 screenplay → 提取 EP 分集 + 场景头(INT./EXT.) + 对白 + Voiceover
-2. 并行生成：人物设定 + 视觉资产清单
-3. 写分镜（EP1-5 Demo 先做）
-4. 写 Prompts（必须包含 Reference 体系）
-5. 补 scene_prop_data.json + manifest.md Reference 章节
-6. 改造 Prompts 用 `[ref: S-XX]`
+2. **从剧本反向初始化状态文件**：提取各集 Cliffhanger/伏笔/角色状态 → continuity.md；visual_continuity.md 从首集分镜起正常累积
+3. 并行生成：人物设定 + 视觉资产清单
+4. 写分镜（EP1-5 Demo 先做）
+5. 写 Prompts（必须包含 Reference 体系）
+6. 补 scene_prop_data.json + manifest.md Reference 章节
+7. 改造 Prompts 用 `[ref: S-XX]`
 
 **完整执行顺序**：人物 → 视觉资产 → 分镜 → Prompts → **Reference 体系**（场景图+道具图+引用标记）
 
@@ -26,10 +27,10 @@
 1. 读取新剧本（PDF → pymupdf 提取文本 → 保存 .txt，或 DOCX → python-docx 解析）
 2. 按 `EPISODE \d+:` 切分 → 提取每集标题/场景/对白
 3. **对比新旧**：集名变化？对白变化？新增角色？集数增减？
-4. 更新 INDEX.md（集名映射）
+4. 更新 outline.md 分集梗概（集名映射）
 5. 批量更新 script/EP-XX.md
 6. 更新 characters.md（如有新角色）
-7. 更新 MASTER.md（如三幕结构变化）
+7. 更新 outline.md 三幕结构（如结构变化）+ continuity.md（Cliffhanger/伏笔随剧本变化）
 8. 更新 generate_index.py（episode range + 解析器兼容新格式）
 9. 运行 generate_index.py + build_html.py 重新生成工作台
 

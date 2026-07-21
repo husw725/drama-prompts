@@ -124,6 +124,12 @@ manifest.md           ← 视觉规则（服装指南、表情库、色调/光�
 3. `manifest.md` → 取服装（按场景）+ 表情（按情绪）
 4. `manifest.md` → 取色调/光影/构图规则
 
+**资产锁定流程（status 状态机）：**
+1. `pending` — 已写 Reference Prompt，未生成参考图
+2. `generated` — 参考图已生成，待人工定妆确认
+3. `locked` — 导演确认后锁定，记录资产 URL/seed（各工具参考机制：Seedance 首尾帧、Kling Elements、MJ cref）
+⚠️ 角色/主场景资产未 `locked` 前，禁止批量生成正式帧——否则批量返工。
+
 **三文件创建顺序：**
 1. 基于 `characters.md` → 视觉导演为每个角色写服装表 + 表情关键词
 2. 遍历剧本场景头 → 提取唯一场景（去重后 ~10-15 个）→ 写 `scene_prop_data.json.scenes[]`
@@ -158,7 +164,7 @@ manifest.md           ← 视觉规则（服装指南、表情库、色调/光�
 
 ### Frame 2: ...
 
-## Video Prompts (Seedance) — 每3-4个连续镜头合并为一段
+## Video Prompts (Seedance) — 每段≤工具单次上限的80%（Seedance 2.5≤24s，约4-6镜）
 ### Shot [N]: [time_range]
 **Prompt:** [action_sequence], camera [movement], [mood]
 **Duration:** [N]s

@@ -41,33 +41,9 @@
 
 **1. 纵向视线引导** — 竖屏天然视线流：上→下；上方=权威/未来/希望，下方=压迫/过去/恐惧
 **2. 画外空间叙事** — 竖屏左右画外空间巨大，角色看向画外→观众看不到→紧张感倍增
-**3. 文字叠加叙事** — 倒计时叠加、内心OS文字、消息弹窗（⚠️ AI生图中文字必崩，需后期合成）
+**3. 文字叠加叙事** — 倒计时叠加、内心OS文字、消息弹窗（⚠️ 旧模型文字易崩；新一代图像模型可直出英文短文本，否则后期合成，见 `parts/ai-tools.md`）
 **4. 竖屏亲密空间** — 竖屏天然适合单人/双人近景，双人近景是杀手锏（拆分生成后合成）
 
 ## 项目目录结构
 
-```
-project/
-├── TASK.md                  # 任务进度跟踪
-├── adaptation-map.md        # 原著对照表（小说改编项目，见 parts/novel-adaptation.md）
-├── outline.md               # 故事大纲（含 project_type + paywall 配置）
-├── continuity.md            # 🔥 剧集连续性追踪（伏笔/悬念/角色状态）
-├── characters/
-│   └── characters.md        # 人物设定（性格、关系、动机、弧光、base_prompt）
-├── visual_assets/
-│   └── manifest.md          # 视觉规则（服装指南、表情库、色调/光影/构图）
-├── scene_prop_data.json     # 场景/道具 Reference Prompts（AI生图参考图）
-├── script/
-│   └── EP-XX.md             # 各集剧本
-├── treatment/
-│   └── EP-XX.md             # 各集 Director's Treatment
-├── storyboard/
-│   └── EP-XX.md             # 各集分镜
-├── prompts/
-│   └── EP-XX.md             # 各集 AI Prompts（含视觉资产注入）
-├── generate_index.py        # MD → JSON 解析脚本
-├── build_html.py            # JSON → SPA 工作台
-├── project_data.json        # 结构化数据（工作台数据源）
-├── index.html               # 离线工作台页面
-└── script.progress.md       # 创作进度记录
-```
+> 唯一维护处：`SKILL.md`「项目目录结构」一节（避免两份树漂移）。

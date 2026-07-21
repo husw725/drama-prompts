@@ -8,17 +8,19 @@
 
 1. **`novel-adaptation.md`** — 阶段0：原著分析 + 支线取舍 + 中式→欧美转译 + adaptation-map
 
-## 写剧本时读这3个文件
+## 写剧本时读这4个文件
 
 1. **`pitfalls.md`** — 爆款原则 + Beat Engine + Premise + DI + 对白=行动 + 炫技防控
 2. **`continuity.md`** — 上集Cliffhanger + 到期伏笔 + 角色状态（只读3项核心）
-3. **`templates.md`** — 剧本模板 + 分镜模板
+3. **`templates.md`** — 剧本模板 + 时间预算
+4. **`workflow.md` 阶段4** — 流程步骤/骨架模式；写 Cliffhanger 标注时查 `reviewers-scoring.md` 的**钩子等级表**
 
-## 写分镜时读这3个文件
+## 写分镜时读这4个文件
 
 1. **`templates.md`** — 分镜模板 + Lighting/Atmosphere/SFX/BGM写法规范
 2. **`continuity.md`** — visual_continuity（上集结尾视觉快照）
 3. **`reference-system.md`** — 角色外观 + 场景/道具Reference
+4. **`workflow.md` 阶段5** — 链式批量 + FAIL级联；Camera 列标注时查 `reviewers-scoring.md` 的**运镜分级表**；竖屏视觉语法见 `architecture.md`
 
 ## 写Prompts时读这3个文件
 
@@ -45,15 +47,15 @@
 
 ### Beat Engine（每集必遵）
 ```
-Hook(0-15s) → Friction(15-60s) → Spike(60-90s) → Button(最后5-10s)
+Hook(0-15s) → Friction(15-60s) → Spike(60-85s) → Button(最后5-10s)
 引爆不是铺垫    可拍摄冲突      重新定价+静音测试   问题前切断
 ```
 
 ### Premise（大纲阶段必检）
-冲突内建于设定，不是场景制造。4种：Enemies-to-lovers / Forbidden proximity / Power imbalance / Arranged circumstance
+冲突内建于设定，不是场景制造。**唯一判据：同框即张力**。已验证示例8种（Enemies-to-lovers / Forbidden proximity / Power imbalance / Arranged circumstance / Fated mates / Second chance / Secret baby / Victim's return），见 pitfalls.md#三
 
 ### Dramatic Irony（EP2-3必建）
-观众知道角色不知道 → 维持差距到付费墙后 → 比cliffhanger更强留存
+观众知道角色不知道 → 维持差距到付费墙后 → 与cliffhanger互补的跨集留存（卡点靠cliffhanger，粘性靠DI）
 
 ### 对白=行动
 每句推进冲突或压力下揭示角色。角色不解释感受，Subtext>Text
@@ -61,8 +63,8 @@ Hook(0-15s) → Friction(15-60s) → Spike(60-90s) → Button(最后5-10s)
 ### 竖屏铁律
 特写/近景≥50%，全景/中景≤30%。vertical drama lives in faces, not locations.
 
-### 付费墙 3-7-21
-Block 1(EP1-3)免费最强钩子 → Block 2(EP4-7)首次付费 → Block 3(EP8-21)DI维持 → Block 4(EP22+)揭秘区
+### 付费墙（paywall_ep 参数化，默认 EP-08）
+免费区(EP1~paywall_ep-1)最强钩子，末集Spike重定价+全剧最强cliffhanger卡币 → 首付转化(+3集)DI拉大 → 深度绑定(中段)DI维持 → 揭秘区(最后1/4)
 详见 `continuity.md` 付费墙规划
 
 ### 炫技防控
@@ -87,9 +89,5 @@ Block 1(EP1-3)免费最强钩子 → Block 2(EP4-7)首次付费 → Block 3(EP8-
 
 ## 审核模式（v5.1 简化）
 
-| 场景 | 激活 | 说明 |
-|------|------|------|
-| 逐集常规 | 仅Aligner | Agent不参与 |
-| 首集 | Aligner + Agent 03 GenZ | 3秒完播率旁白 |
-| 付费墙集 | Aligner + Agent 08 付费墙 | 付费转化旁白 |
-| 全剧审查 | Aligner + 3个Agent旁白 | 主妇+付费墙+影评 |
+逐集常规=仅Aligner；关键集（首集/付费墙集/超自然题材）+1个观众旁白Agent；全剧审查+3个。
+**激活表唯一出处**：`reviewers-agents.md` 激活策略。

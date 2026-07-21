@@ -17,8 +17,10 @@
 |------|------|---------------|
 | Hook | 0:00-0:15 | [引爆画面，3秒定帧，陌生人无需前情即可理解] |
 | Friction | 0:15-1:00 | [可拍摄冲突：物理/语言，非情绪暗示] |
-| Spike | 1:00-1:30 | [最大冲击，重新定价此前信息，静音测试通过] |
-| Button | 最后5-10s | [在问题前切断，比感觉安全早2秒] |
+| Spike | 1:00-1:25 | [最大冲击，重新定价此前信息，静音测试通过] |
+| Button | 1:25-1:30（最后5-10s，从Spike尾部切出） | [在问题前切断，比感觉安全早2秒] |
+
+> Beat 时间按 ep_duration=90s 给出；非 90s 时 Hook/Friction/Spike 按比例缩放，Button 固定最后 5-10s。
 
 ## Scene Breakdown ⚓
 
@@ -46,36 +48,39 @@
 ```
 
 **剧本写作硬规则**（写前自检，详见 `pitfalls.md`）：
-- 对白 12-15 句/集，每句 ≤15 字，冲突前 2 行进入；解释性对白数量目标 0
+- **对白直接以英文创作**（每句 ≤12 words），**10-20 句/集按集类型浮动**（对峙/吵架戏可到 20，氛围/铺垫集可低至 10），冲突前 2 行进入；解释性对白目标 0、硬上限 1 句。禁止先写中文再翻译——那是 Chinglish 的标准生产路径。动作/场景描述可用中文
 - 每句对白推进冲突或压力下揭示角色（对白=行动）
 - 特写/近景可承载的情绪优先写在面部动作里（竖屏特写≥50% 在分镜落实）
 - 结尾 Cliffhanger 必须标注钩子类型+等级
 
 ### 时间预算（每集编剧时必须遵守）
 
+> 总时长 = outline.md 的 `ep_duration`（用户项目启动时指定，默认 **90s**）。以下预算按 90s 给出，非 90s 时各段按比例缩放（开场 3s 与结尾 Cliffhanger 5-10s 固定不缩放）。
+
 ```
-总时长：70s
+总时长：90s（默认，按 ep_duration）
 
 预算分配：
-├── 对白时间：35-40s（约 12-15 句 × 3s/句；含 Hook 段 0-2 句）
-├── 纯动作时间：15-20s（开场 3s + 转场 + 结尾慢推）
-├── 情感留白：5-8s（沉默/表情/反应镜头）
-└── 转场/黑屏：2-5s
+├── 对白时间：30-60s（10-20 句 × 3s/句，按集类型浮动；含 Hook 段 0-2 句）
+├── 纯动作时间：20-40s（开场 3s + 冲突动作 + 转场 + 结尾定格）
+├── 情感留白：5-12s（沉默/表情/反应镜头）
+└── 转场/黑屏：3-5s
 
 强制规则：
 - 开场 3 秒：必须直接进入冲突（不能空镜铺垫）
-- 结尾 5-10 秒：Cliffhanger 慢推（最长 10s）
-- 单个镜头 ≤ 5s（悬念慢推除外，最长 10s）
+- 结尾 Cliffhanger：定格/急停 2-3s，或慢推 ≤5s——必须在问题前切断（Button 原则），不做 10s 抒情慢推
+- 单个镜头 ≤ 5s（无例外）
 ```
 
 **时间校验（编剧完成后自动检查）**：
 
 ```python
+EP_DURATION = 90  # 从 outline.md ep_duration 读取，默认 90
 total_time = sum(shot_duration for shot in shots)
-assert abs(total_time - 70) <= 5, f"时间偏差过大：{total_time}s vs 70s"
+assert abs(total_time - EP_DURATION) <= 5, f"时间偏差过大：{total_time}s vs {EP_DURATION}s"
 
 dialogue_count = len([s for s in shots if s.get('dialogue')])
-assert 12 <= dialogue_count <= 15, f"对白数量：{dialogue_count}（标准 12-15）"
+assert 10 <= dialogue_count <= 20, f"对白数量：{dialogue_count}（软区间 10-20，按集类型浮动）"
 
 max_shot = max(shots, key=lambda s: s['duration'])
 assert max_shot['duration'] <= 10, f"镜头过长：{max_shot['duration']}s（最长 10s）"
@@ -101,7 +106,7 @@ assert max_shot['duration'] <= 10, f"镜头过长：{max_shot['duration']}s（�
 
 ## Shot Notes
 
-- **时长校验**: 各镜头合计 = 70s ✅
+- **时长校验**: 各镜头合计 = ep_duration（默认 90s）✅
 - **景别统计**: 特写/近景 XX%（≥50%）/ 全景/中景 XX%（≤30%）
 - **运镜统计**: 🟢 XX%（≥60%）/ 🟡 N个（≤2，理由如下）/ 🔴 N个（≤1，需人工替代方案）
 - **🟡运镜理由**: #N [为什么这个场景需要手持/跟拍/...]
@@ -109,8 +114,8 @@ assert max_shot['duration'] <= 10, f"镜头过长：{max_shot['duration']}s（�
 ```
 
 **分镜硬规则**（写前检查，详见 `reviewers-scoring.md`）：
-- 镜头数按集类型：氛围 16-18 / 标准 18-22 / 恐怖 20-24 / 高潮 22-25
-- 单镜 ≤5s；正面镜头 ≤35%；运镜种类 ≥5 种
+- 镜头数按集类型：氛围 16-18 / 标准 18-22 / 恐怖 20-24 / 高潮 22-25（**写前默认值，审核端不按镜头数扣分**；成片剪辑一镜可拆多个剪切点，分镜镜头数≠成片剪切数）
+- 单镜 ≤5s；正面镜头 ≤35%（运镜不求种类多——ReelShort 爆款大量是固定+缓推，🟢占比≥60% 才是硬指标）
 - Camera 列每个运镜必须标注 🟢/🟡/🔴 可执行性分级
 - Atmosphere 写物理环境（深夜/雨/闪电），不写情绪词（"恐怖压抑"❌）——Lighting 从 Atmosphere 推导
 - Lighting 按集类型分层精度：氛围集 1 层光源即可，高潮/揭示集才写 2-3 层
@@ -124,8 +129,8 @@ assert max_shot['duration'] <= 10, f"镜头过长：{max_shot['duration']}s（�
 > 完整模板与视觉资产注入规则见 `parts/reference-system.md`（阶段6章节）。解析锚点：
 
 - `## Visual Asset References` ⚓ — 本集角色外观 + 场景列表
-- `### Frame N: [time] [shot]` + `**Prompt:**` ⚓ — 每张图（18-20帧，与分镜一一对应）
-- `### Shot N: [time_range]` + `**Prompt:**` ⚓ — 视频段（每3-4个连续镜头合并）
+- `### Frame N: [time] [shot]` + `**Prompt:**` ⚓ — 每张图（帧数=本集镜头数，与分镜一一对应；镜头数按集类型 16-25，见分镜硬规则）
+- `### Shot N: [time_range]` + `**Prompt:**` ⚓ — 视频段（段长 ≤ 所选工具单次时长上限的80%，见 `ai-tools.md`；如 Seedance 2.5 上限30s → 每段≤24s，约4-6个连续镜头）
 - `## Shot Notes` — 场景/色调/情感弧线/关键道具/服装注意/对白
 
 ---

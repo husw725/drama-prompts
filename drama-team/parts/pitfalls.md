@@ -47,7 +47,7 @@
 2. **每集输出预算** — 一集完整三件套+审核≈15-17K tokens
 3. **主Agent逐集是默认方案** — 实测20+集无问题
 4. **中断恢复** — 用 `ls script/ storyboard/ prompts/` + `stat` 确认实际完成进度
-5. **continuity批量更新** — 每3-5集批量更新一次；EP-20+后只保留活跃伏笔
+5. **continuity更新** — 每集必更核心三项（Cliffhanger/伏笔操作/角色状态，轻量追加）；全文件整理压缩每3集一次；EP-20+后只保留活跃伏笔
 6. **Review可内联** — 审核结果可内联到Script文件末尾，节省1个write_file
 
 ### 1.6 子Agent上下文压缩（如必须用）
@@ -67,13 +67,14 @@
 ## 二、Beat Engine — 欧美爆款核心结构
 
 > 每集按 **Hook → Friction → Spike → Button** 四段写。先写timestamp skeleton，再写对白承载。结构先行，语言后行。
+> ⚠️ **四段是功能，不是秒表**：时间戳是默认骨架；单场连续对峙集（从头吵到尾）允许结构上不可切分，但四个功能（引爆/可拍摄冲突/重定价/切断）必须齐备——审核按功能查，不按时间戳扣分。
 
 | 段 | 时间 | 作用 | 硬规则 |
 |---|------|------|--------|
 | **Hook** | 0-15s | 引爆 | 3秒定帧：陌生人不需要前情就能理解画面 |
 | **Friction** | 15-60s | 引擎室 | 必须是**可拍摄的冲突**（物理/语言），不是情绪暗示 |
-| **Spike** | 60-90s | 最大冲击 | 重新定价之前所有信息；静音测试：静音后spike消失=不是spike |
-| **Button** | 最后5-10s | 悬念切断 | 在问题前切断，不是答案后。比感觉安全早2秒 |
+| **Spike** | 60-85s | 最大冲击 | 重新定价之前所有信息；静音测试：静音后spike消失=不是spike |
+| **Button** | 最后5-10s（从Spike尾部切出） | 悬念切断 | 在问题前切断，不是答案后。比感觉安全早2秒 |
 
 **AI常犯错误**：
 - ❌ Hook写成铺垫 / Friction写成情绪暗示 / Spike依赖音效 / Button解释太多
@@ -84,22 +85,26 @@
 
 > 冲突必须**内建于premise**，不是场景制造。90秒一集，没有时间逐场制造障碍。
 
-**4种爆款Premise**：
+**已验证的爆款Premise（示例表，不是白名单）**：
 
 | Premise | 自动产生冲突原因 | 适用类型 |
 |---------|-----------------|----------|
 | **Enemies-to-lovers** | 角色天然对立 | revenge, forced_love |
 | **Forbidden proximity** | 被迫共处但不该在一起 | forced_love, mystery |
 | **Power imbalance** | 权力不对等 | forced_love, mary_sue |
-| **Arranged/forced circumstance** | 非自愿连接 | forced_love, revenge |
+| **Arranged/forced circumstance** | 非自愿连接（含契约婚姻 Marriage of convenience） | forced_love, revenge |
+| **Fated mates / Rejected mate** | 命定纽带被拒绝/背叛，张力内建于设定 | vampire_werewolf |
+| **Second chance / 离婚开局** | 旧关系破裂后被迫重逢，旧债即张力 | revenge, sweet_romance |
+| **Secret baby** | 隐藏的孩子=行走的定时炸弹信息差（天然DI） | forced_love, sweet_romance |
+| **Victim's return** | 受害者带新身份归来，每次同框都是清算倒计时 | revenge, mary_sue |
 
-**Premise自检**：角色只要同框就有张力→合格；需要每场戏制造障碍→重做
+**Premise自检（唯一判据）**：角色只要同框就有张力→合格；需要每场戏制造障碍→重做。上表是已验证示例，命中判据但不在表内的 Premise 同样合格。
 
 ---
 
 ## 四、Dramatic Irony — 最强留存机制
 
-> 观众知道角色不知道的事。比cliffhanger更强的付费驱动力。
+> 观众知道角色不知道的事。与 cliffhanger **互补**的留存机制：卡点转化靠 cliffhanger，跨集粘性靠 DI（secret baby/隐藏身份类全靠它）。
 
 **实操规则**：
 1. EP 2-3 建立观众信息优势
