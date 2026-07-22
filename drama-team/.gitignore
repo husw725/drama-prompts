@@ -41,6 +41,7 @@ Thumbs.db
 my-drama-project/
 *.md.backup
 
-# Test files
+# Test files（临时测试脚本；tools/ 下的正式冒烟测试豁免）
 test_*.py
 *_test.py
+!tools/test_*.py
