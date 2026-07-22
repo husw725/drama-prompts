@@ -208,7 +208,11 @@ for EP:
  - FAIL → 重写 → 最多3轮，否则人工介入
 
  Step 3: 更新continuity.md（每集必更核心三项：Cliffhanger/伏笔操作/角色状态；全文件整理压缩每3集一次）
- ⚠️ 逾期/到期伏笔必须每集检查（检查依赖核心三项为最新——这是每集必更的原因）
+
+ Step 4: 跑验证器（机械检查一次跑完 ⭐）
+ - `python3 <技能目录>/tools/validate_ep.py EP-XX --project .`
+ - 自动检查：时长/对白句数与英文/钩子标注/⚓锚点/伏笔到期逾期/continuity已更新
+ - FAIL → 修复后重跑；全绿 → git commit → 下一集
 ```
 
 ---
@@ -236,6 +240,8 @@ for EP:
 
 **⚠️ FAIL 重写级联（硬规则）**：FAIL 集重写后，①重新更新该集结尾视觉快照 ②对其**后一集**重跑"跨集视觉承接"检查（仅 Storyboard-Aligner 维度9）——后一集是基于旧快照生成的，快照变了必须复检。
 
+**每集分镜完成后跑验证器**：`validate_ep.py` 会自动查单镜≤5s/景别占比/运镜分级与🟡理由/视觉衔接声明/**visual_continuity 快照是否已更新**——快照没更新直接 FAIL，堵住批量时最常见的漏更。
+
 **⚠️ visual_continuity.md 更新节奏（硬规则）**：
 - **每集分镜完成后立即更新**，不是批量结束后才更新
 - 批量生成2-3集时，每写完1集就追加该集的结尾视觉快照
@@ -250,7 +256,7 @@ for EP:
 
 **每集读取上下文**：script/EP-XX.md + characters.md + manifest.md + scene_prop_data.json + visual_continuity.md（上集结尾快照）
 
-2-3集合并 → Prompt-Aligner批量审核 → FAIL集统一修改 → 人工确认
+2-3集合并 → 每集跑 `validate_ep.py`（帧数=镜头数/ref注入/风格漂移）→ Prompt-Aligner批量审核 → FAIL集统一修改 → 人工确认
 
 **⚠️ visual_continuity.md 读取（硬规则）**：
 - 每集Prompts生成前必须读取 visual_continuity.md 中上集结尾快照

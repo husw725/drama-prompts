@@ -72,6 +72,11 @@ Hook(0-15s) → Friction(15-60s) → Spike(60-85s) → Button(最后5-10s)
 - 钩子：能用单一的不用复合，能用低级的不用高级
 - 核心冲击力(12分)最高权重：合规但无聊=不及格
 
+### 每集收尾三件事（唯一需要记住的习惯）
+1. 更新 continuity 核心三项（分镜完成另加 visual_continuity 快照）
+2. `python3 <技能目录>/tools/validate_ep.py EP-XX --project .` → FAIL 不进下一集
+3. 全绿 → `git commit -m "EP-XX: 定稿"`（回退/差异/恢复全靠 git）
+
 ---
 
 ## 工作流（阶段0-7）

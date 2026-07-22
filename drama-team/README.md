@@ -1,7 +1,8 @@
 # 🎬 Drama Team — 小说 → 欧美短剧全流程编剧技能
 
 > 从小说/Idea 到剧本、分镜、AI 生图 Prompt、离线工作台的一站式创作系统。
-> 当前版本 **v5.4**，目标市场**欧美竖屏短剧**（ReelShort/DramaBox 类平台）。
+> 当前版本 **v5.5**，目标市场**欧美竖屏短剧**（ReelShort/DramaBox 类平台）。
+**宿主无关**：不绑定任何 agent 框架，唯一依赖 = 文件系统 + python3 + git。
 
 ## 入口
 
@@ -14,7 +15,8 @@
 - **七阶段工作流**：小说改编 → 大纲 → 人物 → 视觉资产 → 逐集剧本（串行）→ 批量分镜 → 批量 Prompts → 工作台
 - **叙事层/制作层分离**：剧本必须串行（连续性不可妥协），分镜/Prompts 可批量
 - **欧美爆款方法论**：Beat Engine（Hook→Friction→Spike→Button）+ Premise-Driven Conflict + Dramatic Irony + 付费墙 paywall_ep 参数化 Block 分层 + 竖屏特写优先
-- **三 Aligner 审核**：Script/Storyboard/Prompt 三个专用审核员独立评分（≥80 PASS），关键集可选 Agent 观众旁白
+- **三 Aligner 审核**：Script/Storyboard/Prompt 三个专用审核员**独立上下文盲审**（≥80 PASS），关键集可选 Agent 观众旁白
+- **每集验证器**：机械硬规则收敛为一条命令 `tools/validate_ep.py EP-XX`（时长/对白/锚点/景别/运镜/伏笔/快照同步），FAIL 不进下一集；每集定稿一个 git commit
 - **视觉一致性**：characters.md + manifest.md + scene_prop_data.json 三文件架构 + `[ref: C-XX/S-XX/P-XX]` 引用体系 + visual_continuity.md 跨集追踪
 
 ## 相关文件
@@ -22,7 +24,8 @@
 | 文件 | 用途 |
 |------|------|
 | [`SKILL.md`](./SKILL.md) | 技能入口 + 模块索引 |
-| [`parts/`](./parts/) | 17 个按需加载的模块 |
+| [`parts/`](./parts/) | 18 个按需加载的模块 |
+| [`tools/validate_ep.py`](./tools/validate_ep.py) | 每集验证器（宿主无关，python3 stdlib） |
 | [`RATIONALE.md`](./RATIONALE.md) | 每条规则的来源、原因和行业验证（不参与运行时加载） |
 | 同仓库 `short-drama-production-index/` | 工作台 SPA 模板与构建脚本 |
 

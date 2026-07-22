@@ -48,7 +48,9 @@
 3. **主Agent逐集是默认方案** — 实测20+集无问题
 4. **中断恢复** — 用 `ls script/ storyboard/ prompts/` + `stat` 确认实际完成进度
 5. **continuity更新** — 每集必更核心三项（Cliffhanger/伏笔操作/角色状态，轻量追加）；全文件整理压缩每3集一次；EP-20+后只保留活跃伏笔
-6. **Review可内联** — 审核结果可内联到Script文件末尾，节省1个write_file
+6. **Review可内联** — 审核结果可内联到Script文件末尾（末尾必须有 `**总分: XX/100**` 行，验证器靠它做膨胀趋势检测），节省1个write_file
+7. **每集必跑验证器** ⭐ — 每集三件套完成后跑 `python3 <技能目录>/tools/validate_ep.py EP-XX --project .`，有 FAIL 不得进入下一集。**这是唯一需要记住的习惯**——时长/对白/锚点/景别/运镜/伏笔/快照同步等所有机械检查都在工具里，不再依赖逐条自觉
+8. **每集定稿一个 git commit** — `git commit -m "EP-XX: 定稿"`。回退=revert/checkout 该集，版本差异=git diff，中断恢复=git log+ls；不再手工维护版本快照
 
 ### 1.6 子Agent上下文压缩（如必须用）
 

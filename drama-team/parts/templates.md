@@ -72,19 +72,7 @@
 - 单个镜头 ≤ 5s（无例外）
 ```
 
-**时间校验（编剧完成后自动检查）**：
-
-```python
-EP_DURATION = 90  # 从 outline.md ep_duration 读取，默认 90
-total_time = sum(shot_duration for shot in shots)
-assert abs(total_time - EP_DURATION) <= 5, f"时间偏差过大：{total_time}s vs {EP_DURATION}s"
-
-dialogue_count = len([s for s in shots if s.get('dialogue')])
-assert 10 <= dialogue_count <= 20, f"对白数量：{dialogue_count}（软区间 10-20，按集类型浮动）"
-
-max_shot = max(shots, key=lambda s: s['duration'])
-assert max_shot['duration'] <= 10, f"镜头过长：{max_shot['duration']}s（最长 10s）"
-```
+**时间校验（编剧完成后自动检查）**：由 `tools/validate_ep.py` 执行（唯一实现）——时长=ep_duration±5s（自动从 outline.md 读取）、对白 10-20 句软区间、对白必须英文、单镜≤5s、⚓锚点完整、Cliffhanger 钩子等级标注。写完跑一遍，FAIL 不进下一集。
 
 ---
 

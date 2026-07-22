@@ -98,57 +98,13 @@
 
 ### 逾期伏笔自动检查（每集生成后必跑 ⭐）
 
-> 每集剧本/分镜生成后，自动扫描 continuity.md 中 ⏳逾期 和 🟡待回收 项，输出告警。
-
-**检查逻辑（伪代码）**：
-```
-for each foreshadow in continuity.md:
-  if status == ⏳逾期:
-    WARN: "F-{id} 已逾期{current_ep - due_ep}集，必须本集或下集回收"
-    if current_ep - due_ep >= 3:
-      ERROR: "F-{id} 逾期≥3集，Aligner将扣5分"
-  if status == 🟡待回收 and due_episode == current_ep:
-    WARN: "F-{id} 本集到期，必须回收"
-  if status == 🟡待回收 and due_episode == current_ep + 1:
-    INFO: "F-{id} 下集到期，提前提醒"
-```
+> 由 **`tools/validate_ep.py`** 承担（唯一实现，本文件不再内嵌脚本）：扫描伏笔表中 ⏳逾期 和 🟡待回收 项——本集到期→WARN 必须回收，逾期≥3集→FAIL（Aligner 扣5分，出处见 `reviewers-scoring.md` 悬念钩子维度）。
+> 同时检查「当前进度/Last Cliffhanger」是否已登记本集（伏笔表预登记的集数不算已更新）。
 
 **集成方式**：
-- 阶段4 Step 3（更新continuity后）自动执行检查
-- 检查结果追加到 TASK.md 的「伏笔告警」章节
+- 阶段4 Step 4 统一执行（`python3 <技能目录>/tools/validate_ep.py EP-XX --project .`）
+- 检查结果可追加到 TASK.md 的「伏笔告警」章节
 - ⏳逾期项在下一集编剧 Step 0 时强制读取（加入上下文）
-- 如逾期≥3集，Aligner自动扣5分（无需人工触发）
-
-**Python 检查脚本（可独立运行）**：
-```python
-import re, sys
-
-def check_foreshadow(continuity_path, current_ep):
-    with open(continuity_path) as f:
-        content = f.read()
-    warnings = []
-    # 匹配伏笔表行：| F-XX | 描述 | EP-XX | EP-XX | 状态 |
-    pattern = r'\|\s*(F-\d+)\s*\|\s*([^|]+)\s*\|\s*EP-(\d+)\s*\|\s*EP-(\d+)\s*\|\s*(🟡|🔵|✅|⏳|❌)'
-    for m in re.finditer(pattern, content):
-        fid, desc, planted, due, status = m.groups()
-        due_ep = int(due)
-        if status == '⏳':
-            overdue = current_ep - due_ep
-            warnings.append(f"⚠️ {fid} 已逾期{overdue}集: {desc.strip()}")
-            if overdue >= 3:
-                warnings.append(f"🔴 {fid} 逾期≥3集，Aligner扣5分")
-        elif status == '🟡' and due_ep == current_ep:
-            warnings.append(f"⏰ {fid} 本集到期，必须回收: {desc.strip()}")
-        elif status == '🟡' and due_ep == current_ep + 1:
-            warnings.append(f"💡 {fid} 下集到期: {desc.strip()}")
-    return warnings
-
-if __name__ == '__main__':
-    path = sys.argv[1] if len(sys.argv) > 1 else 'continuity.md'
-    ep = int(sys.argv[2]) if len(sys.argv) > 2 else 1
-    for w in check_foreshadow(path, ep):
-        print(w)
-```
 
 ---
 
@@ -253,6 +209,8 @@ Aligner 检查规则：
 | 剧本/分镜/Prompts | Aligner ≥ 80 | 重写（最多3轮） |
 
 ### 回退链机制
+
+> 前提（硬规则）：**每集定稿一个 git commit**（`EP-XX: 定稿`）。回退的物理操作交给 git——`git checkout <commit> -- script/EP-XX.md` 取回旧版，`git diff` 判定影响范围；本节只管叙事状态的级联修复。
 
 发现前集有重大逻辑错误时：
 1. 修复问题集 → 重新Aligner

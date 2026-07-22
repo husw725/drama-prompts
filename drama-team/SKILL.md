@@ -1,7 +1,7 @@
 ---
 name: drama-team
 description: 小说→欧美短剧全流程系统 — 小说改编方法论+叙事层串行+制作层批量分离+类型参数化+付费墙建模+模块化拆分，含剧集连续性追踪、伏笔管理、视觉一致性管控与独立审核机制
-version: 5.4
+version: 5.5
 author: Hermes Agent + User
 license: MIT
 metadata:
@@ -10,9 +10,11 @@ metadata:
     related_skills: [hermes-agent, writing-plans, short-drama-production-index]
 ---
 
-# Drama Team 短剧编剧团队 v5.4
+# Drama Team 短剧编剧团队 v5.5
 
 > 小说 → 优质欧美短剧全流程系统：从小说/Idea到剧本、分镜、AI生图Prompt。目标市场：**欧美竖屏短剧**（唯一）。
+> **宿主无关**：本技能不绑定任何 agent 框架，唯一外部依赖 = 文件系统 + python3 + git；所有强制检查收敛在 `tools/validate_ep.py`，任何 LLM/人都能执行同一套流程。
+> **v5.5**: 执行器落地（借鉴 agent 工程思想，宿主无关实现）— 新增 tools/validate_ep.py 每集验证器(机械硬规则一条命令全查,FAIL门禁)，盲审硬规则(独立上下文+输入白名单,根治自评膨胀)，git检查点(每集定稿一commit,回退/差异/恢复退役手工方案)，总分行机器可读约定+膨胀趋势自动检测，内嵌伪代码脚本全部退役指向工具
 > **v5.4**: 评分与知识面更新 — 权重表21维(新增角色魅力/代入感,广告素材潜力全类型提8,声音改音爆点标注)，Beat Engine按功能不按秒表，Premise扩8种示例(判据=同框即张力)，转译表补6套路(Groveling hero/重生/契约婚姻/替身/离婚开局/Fated mates)，ai-tools更新2026-07实况+核验日期机制，依赖图补visual_continuity+FAIL级联+回退补视觉，索引去重(激活表/目录树/decisions-log单源化)，TASK.md格式契约，⚓两级契约
 > **v5.3**: 商业参数落地 — 付费墙改paywall_ep参数化(默认EP-08,删3-7-21)，总集数商业规格50-80(默认60)，ep_duration参数化(默认90s)，对白英文直写≤12词，开场统一3秒，伏笔逾期扣分收编进评分表，continuity每集必更核心三项，删运镜种类下限
 > **v5.2**: 结构修复+欧美聚焦 — 修复模块拆分残缺文件，templates补齐剧本/分镜格式契约，新增阶段0小说改编方法论(novel-adaptation)，评分体系统一为类型权重表单一真相源(每列合计100)，删除多区域矩阵彻底聚焦欧美
@@ -62,9 +64,9 @@ metadata:
 6. 按阶段推进，每阶段开始前读对应文件（见上表）
 
 ### 单集创作
-1. 读 `parts/continuity.md` → 读 `parts/templates.md` → 写剧本 → 跑**Aligner审核**（关键集可选观众旁白）
+1. 读 `parts/continuity.md` → 读 `parts/templates.md` → 写剧本 → 跑**Aligner审核**（独立上下文盲审；关键集可选观众旁白）
 2. 写分镜 → 跑审核 → 写Prompts → 读 `parts/reference-system.md` 注入视觉资产 → 跑审核
-3. 更新 continuity（增量delta或批量）
+3. 收尾三件事：更新 continuity 核心三项 → `python3 tools/validate_ep.py EP-XX --project .`（FAIL不进下一集）→ `git commit -m "EP-XX: 定稿"`
 
 ### 批量任务（分镜/Prompts）
 1. 读 `parts/pitfalls.md` 的批量执行纪律
@@ -120,6 +122,9 @@ metadata:
 | **审核系统** | Aligner独立评分（≥80 PASS）+关键集可选观众旁白（Agent不打分） | `parts/reviewers-workflow.md` |
 | **竖屏视觉语法** | 纵向视线引导+画外空间叙事+特写/近景≥50% | `parts/architecture.md` |
 | **格式契约** | 剧本/分镜/Prompt的⚓锚点标题与解析器正则逐一对应，不可改 | `parts/templates.md` |
+| **每集验证器** | 机械硬规则全部收敛为一条命令：`tools/validate_ep.py EP-XX`，FAIL不进下一集 | `tools/validate_ep.py` |
+| **盲审** | Aligner评分必须独立上下文（子代理/新会话皆可），输入白名单隔离创作过程 | `parts/reviewers-workflow.md` |
+| **git检查点** | 每集定稿一个commit；回退/差异/中断恢复全靠git | `parts/pitfalls.md` §1.5 |
 
 ---
 
@@ -175,3 +180,4 @@ project/
 | v5.2 | 结构修复+欧美聚焦：修复拆分残缺文件+templates格式契约+阶段0小说改编+类型权重表统一评分+删多区域矩阵 | 全面审计：3处文件残缺+3套评分刻度矛盾+小说改编环节缺失 |
 | v5.3 | 商业参数落地：paywall_ep参数化(删3-7-21)+集数50-80+ep_duration参数化+对白英文直写+开场3秒统一+伏笔扣分收编评分表+continuity每集必更核心三项 | 双视角审查（架构师+短剧导演）：付费墙EP4/EP8两套矛盾、3-7-21查无行业依据、集数撑不起投流、中文对白→翻译产生Chinglish |
 | v5.4 | 评分21维(角色魅力+广告素材8分+音爆点)+Beat按功能+Premise 8示例+转译表补6套路+ai-tools 2026-07+依赖图/FAIL级联/回退补视觉+索引单源化+TASK契约+⚓两级 | 双视角审查P1批：评分体系放过"结构满分角色无魅力"、工具表过时一代、加载路径缺写作端词汇表、状态文件无格式契约 |
+| v5.5 | 执行器落地(宿主无关)：validate_ep.py每集验证器+FAIL门禁、盲审(独立上下文+输入白名单)、git检查点、总分行约定+膨胀自动检测、内嵌脚本退役 | 借鉴 agent 工程思想：确定性规则应由执行器强制而非模型自觉；审稿人与写手共享上下文是评分膨胀根因 |
