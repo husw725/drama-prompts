@@ -128,20 +128,19 @@ Aligner 检查规则：
 
 ---
 
-### continuity.md 更新规则（每集完成后）
+### continuity.md 更新规则
 
-1. 伏笔管理表 — 新增本集埋下的，标记本集回收的
-2. Last Cliffhanger — 记录本集结尾悬念
-3. 角色状态 — 更新因本集剧情变化的角色
-4. 角色物理状态 — 服装/受伤/物理位置变化（仅标注变化）
-5. 冲突模式 — 记录本集冲突类型
-6. Beat Engine状态 — 四段实际时间分布
-7. Premise验证 — 冲突是否Premise驱动
-8. DI状态 — 观众信息优势+差距维持
-9. 对白=行动 — 解释性对白数量（目标0），冲突前2行进入
-10. 竖屏特写占比 — 目标≥50%
-11. 声音/BGM节奏 — 是否随Beat Engine变化
-12. 未解决问题 — 更新问题列表
+**每集完成后必更（核心三项，轻量追加~200字）**：
+
+1. Last Cliffhanger — 本集结尾悬念（类型+等级）
+2. 伏笔操作 — 新埋的登记，回收的标记
+3. 角色状态 — 因本集剧情变化的角色（服装/受伤/物理位置仅标注变化）
+
+另加一行本集冲突类型（下集避免重复）；DI 差距有变化时同步更新 DI 追踪表。
+
+**每3集整理压缩时补记**：角色互动/感官刺激记录、叙事预算状态重算、未解决问题清单。
+
+> Beat 时间分布、特写占比、对白句数等机械项由 `tools/validate_ep.py` 检查，不人工记录（防 continuity 膨胀，见 pitfalls 炫技防控 #5）。
 
 ---
 
@@ -239,43 +238,3 @@ Aligner 检查规则：
 - 时代错误/地理跳跃→加过渡
 
 **审查报告**：REVIEW-IMPATIENT-BRO.md + REVIEW-LOGIC-MASTER.md + REVIEW-VISUAL-EXPERT.md + REVIEW-SUMMARY.md
-
----
-
-## 增量 Continuity 方案（长剧推荐 ⭐）
-
-> 每集只写 diff，运行时由脚本合并为完整状态。避免每集重写大文件。
-
-### 格式：continuity-delta/EP-XX.yaml
-
-```yaml
-ep: 03
-cliffhanger: "密室入口暴露，钟声响起"
-foreshadow:
- resolve: [F-01] # 本集回收
- plant: [F-07] # 本集新埋
- due_next: [F-02] # 下集到期
-chars:
- Laura: {state: "调查咬痕", outfit: white_nightgown}
- Carmilla: {state: "部分揭示身份", outfit: black_dress}
-conflict: 信息争夺 # 本集类型，下集避免
-beat: {hook: 3, friction: 45, spike: 30, button: 7} # 秒
-di:
- DI-01: {gap: "维持", note: "Laura仍不知道"}
-sensory: 3 # 感官得分
-closeup_pct: 55 # 特写占比
-```
-
-### 运行时合并
-
-```python
-# continuity_runtime = merge(continuity_base.yaml, delta/EP-01.yaml, ..., delta/EP-N.yaml)
-# 每集开始前：合并到当前集 → 传给编剧
-# 每集结束后：写 delta/EP-XX.yaml（只写变化量）
-```
-
-**优势**：
-- 每集更新从~2000字符→~200字符（-90%）
-- 不重写大文件，无截断风险
-- 可程序化校验（YAML schema）
-- 长剧（30+集）无膨胀问题

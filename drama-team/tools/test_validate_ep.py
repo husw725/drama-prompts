@@ -67,6 +67,7 @@ def build_project(root):
     # EP-02 违规:超时长/中文对白/无钩子标注/🟡x3无理由/全景超标/快照未更新/风格漂移/缺ref
     rows = NL.join(f"| {i+1} | {i*10}-{i*10+10}s | 老宅 | a | 台词 |" for i in range(10))
     kd2 = NL.join(f'| {i+1} | L | "你骗了我这么多年" | x |' for i in range(8))
+    kd2 += f'{NL}| 9 | L | "I have been waiting for this moment for so many long years believe me" | x |'
     write(root, "script/EP-02.md", f"""# EP-02
 ## Scene Breakdown ⚓
 | # | 时间 | 场景 | 画面/动作 | 对白/VO |
@@ -98,8 +99,8 @@ def build_project(root):
 """)
 
 
-def run(root, ep):
-    p = subprocess.run([sys.executable, os.path.join(HERE, "validate_ep.py"), ep, "--project", root],
+def run(root, *args):
+    p = subprocess.run([sys.executable, os.path.join(HERE, "validate_ep.py"), *args, "--project", root],
                        capture_output=True, text=True)
     return p.returncode, p.stdout
 
@@ -112,13 +113,25 @@ def main():
         assert "F-01 下集到期" in out, out
         code, out = run(root, "EP-02")
         assert code == 1, "违规集应 FAIL"
-        for expected in ["script/时长", "对白英文", "钩子标注", "视觉衔接", "单镜",
+        for expected in ["script/时长", "对白英文", "对白长度", "钩子标注", "视觉衔接", "单镜",
                          "storyboard/景别", "运镜理由", "ref注入", "风格漂移",
                          "visual_continuity", "continuity/更新", "F-09 已逾期"]:
             assert expected in out, f"漏检 [{expected}]:\n{out}"
         n_yellow = out.count("🟡 运镜 3 个")
         assert n_yellow == 1, out
-    print("validate_ep 冒烟测试: PASS(合规集放行,违规集12类埋点全部抓到)")
+        # --all: EP-03 只有 script 存根 → storyboard/prompts 缺失 FAIL + 空文件 WARN
+        write(root, "script/EP-03.md", "# EP-03 stub\n")
+        code, out = run(root, "--all")
+        assert code == 1, out
+        for expected in ["storyboard/EP-03.md 不存在", "prompts/EP-03.md 不存在", "script/EP-03.md <500"]:
+            assert expected in out, f"--all 漏检 [{expected}]:\n{out}"
+    # 3集剧本都无总分行 → 膨胀趋势检测失效 WARN
+    with tempfile.TemporaryDirectory() as root:
+        for i in (1, 2, 3):
+            write(root, f"script/EP-0{i}.md", "# stub\n")
+        _, out = run(root, "EP-03")
+        assert "膨胀趋势检测失效" in out, out
+    print("validate_ep 冒烟测试: PASS(合规集放行,违规集13类埋点+--all+总分行告警全部抓到)")
 
 
 if __name__ == "__main__":

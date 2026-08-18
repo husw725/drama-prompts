@@ -4,8 +4,11 @@
 把散落在技能文档里的机械检查收敛为一条命令:
     python3 tools/validate_ep.py EP-05 [--project /path/to/project]
 
+全项目文件完整性(批量生成后/工作台前):
+    python3 tools/validate_ep.py --all [--project /path/to/project]
+
 检查项(机器可测的全部硬规则):
-  script/     ⚓锚点完整 | 时长≈ep_duration±5 | 对白10-20句且英文 | Cliffhanger钩子等级标注
+  script/     ⚓锚点完整 | 时长≈ep_duration±5 | 对白10-20句且英文且≤12词/句 | Cliffhanger钩子等级标注
   storyboard/ ⚓锚点 | 单镜≤5s | 总时长 | 特写/近景≥50%,全景/中景≤30% | 🟢≥60%,🟡≤2须有理由,🔴≤1 | 视觉衔接声明
   prompts/    ⚓锚点 | 帧数=分镜镜头数 | 每帧含[ref:] | 风格词漂移
   continuity  伏笔状态机(到期/逾期告警) | 本集已登记 | visual_continuity 快照已更新
@@ -104,6 +107,9 @@ def check_script(path, ep_duration):
         zh = [r for r in rows if len(r) > 2 and cjk_ratio(r[2]) > 0.3]
         if zh:
             report(FAIL, "script/对白英文", f"{len(zh)} 句台词为中文——对白必须英文直写(禁止中文→翻译)")
+        long_lines = [r[0] for r in rows if len(r) > 2 and len(re.findall(r"[A-Za-z']+", r[2])) > 12]
+        if long_lines:
+            report(WARN, "script/对白长度", f"{len(long_lines)} 句 >12 words(#{','.join(long_lines)})——竖屏对白短促")
     # Cliffhanger 钩子等级标注
     cf = section_of(text, "Cliffhanger")
     if cf and not re.search(r"[（(]\s*\d+\s*[)）]", cf):
@@ -232,20 +238,55 @@ def check_continuity(project, ep_num, storyboard_exists):
 
 def check_score_trend(project):
     scores = []
-    for f in sorted(glob.glob(os.path.join(project, "script", "EP-*.md"))):
+    files = sorted(glob.glob(os.path.join(project, "script", "EP-*.md")))
+    for f in files:
         text = read(f) or ""
         m = re.findall(r"总分[:：]\s*\**\s*(\d+)\s*/\s*100", text)
         if m:
             scores.append((os.path.basename(f), int(m[-1])))
+    if len(files) >= 3 and not scores:
+        report(WARN, "评分趋势", f"{len(files)} 集剧本均无「总分: XX/100」行——膨胀趋势检测失效,审核报告请内联总分行")
     if len(scores) >= 3 and all(s >= 90 for _, s in scores[-3:]):
         report(WARN, "评分膨胀", f"连续3集总分≥90({scores[-3:]})——按 reviewers-scoring 自检规则,人工抽检最近一集")
 
 
+def check_all(project):
+    """全项目三件套完整性(批量生成后必跑)。以 script/ 集数为基准。"""
+    script_eps = [int(m.group(1)) for f in glob.glob(os.path.join(project, "script", "EP-*.md"))
+                  if (m := re.search(r"EP-(\d+)", os.path.basename(f)))]
+    if not script_eps:
+        report(FAIL, "all/script", "script/ 下没有任何 EP-*.md")
+        return
+    total = max(script_eps)
+    for sub in ("script", "storyboard", "prompts"):
+        if sub != "script" and not glob.glob(os.path.join(project, sub, "EP-*.md")):
+            report(WARN, f"all/{sub}", "目录为空(未到该阶段则忽略)")
+            continue
+        for i in range(1, total + 1):
+            fp = os.path.join(project, sub, f"EP-{i:02d}.md")
+            if not os.path.exists(fp):
+                report(FAIL, "all/缺失", f"{sub}/EP-{i:02d}.md 不存在")
+            elif os.path.getsize(fp) < 500:
+                report(WARN, "all/疑似空文件", f"{sub}/EP-{i:02d}.md <500 bytes")
+    report(OK, "all", f"以 script/ 最大集 EP-{total:02d} 为基准查完三件套")
+
+
 def main():
     ap = argparse.ArgumentParser()
-    ap.add_argument("ep", help="EP-05 或 5")
+    ap.add_argument("ep", nargs="?", help="EP-05 或 5")
+    ap.add_argument("--all", action="store_true", help="全项目三件套完整性检查(批量生成后)")
     ap.add_argument("--project", default=".", help="项目根目录(默认当前目录)")
     args = ap.parse_args()
+    if args.all:
+        check_all(args.project)
+        print(f"\n=== 全项目完整性报告 ===")
+        for level, check, msg in results:
+            print(f"{level} [{check}] {msg}")
+        fails = sum(1 for l, _, _ in results if l == FAIL)
+        print(f"\n结果: {fails} FAIL → {'❌ 补齐后重跑' if fails else '✅ 三件套完整'}")
+        sys.exit(1 if fails else 0)
+    if not args.ep:
+        ap.error("需要 EP 参数或 --all")
     ep_num = int(re.sub(r"\D", "", args.ep))
     ep = f"EP-{ep_num:02d}"
     project = args.project

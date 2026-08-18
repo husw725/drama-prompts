@@ -205,6 +205,8 @@
 | v3.9 | visual_continuity+链式批量+集定位+大纲承诺 | "分镜连续性有问题"+"生成慢" | Carmilla v2 |
 | v4.0 | AI炫技防控+核心冲击力+Lighting分层+运镜收紧+钩子简单性 | "合规但平庸"——专业度和短剧节奏的张力 | — |
 | v4.1 | Beat Engine+Premise-Driven Conflict+Dramatic Irony+对白=行动+3-7-21 Block+竖屏特写优先 | 欧美爆款行业验证——Filmustage/ReelShort/DramaBox收敛结论 | — |
+| v5.2-v5.5 | 见 SKILL.md 版本演进表 | 同左 | — |
+| v5.6 | Premise"4种"残留清理(判据制单源化)、continuity更新规则收敛核心三项(删12项旧清单)、盲审白名单补outline分集梗概、删增量delta悬空方案(无工具支撑且验证器不兼容)、validate_ep补≤12词/总分行缺失告警/--all完整性模式、SKILL与quickstart速查去重 | 全量审查发现：v5.4"8种Premise+判据制"未打穿novel-adaptation/scoring/patterns三文件——"复述必漂移"的现行实例；v5.3"核心三项"与旧12项清单并存自相矛盾；"机械规则全收敛进工具"承诺存在漏项(≤12词、文件完整性伪代码) | — |
 
 ---
 

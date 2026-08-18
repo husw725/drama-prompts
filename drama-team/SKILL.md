@@ -1,7 +1,7 @@
 ---
 name: drama-team
 description: 小说→欧美短剧全流程系统 — 小说改编方法论+叙事层串行+制作层批量分离+类型参数化+付费墙建模+模块化拆分，含剧集连续性追踪、伏笔管理、视觉一致性管控与独立审核机制
-version: 5.5
+version: 5.6
 author: Hermes Agent + User
 license: MIT
 metadata:
@@ -10,10 +10,11 @@ metadata:
     related_skills: [hermes-agent, writing-plans, short-drama-production-index]
 ---
 
-# Drama Team 短剧编剧团队 v5.5
+# Drama Team 短剧编剧团队 v5.6
 
 > 小说 → 优质欧美短剧全流程系统：从小说/Idea到剧本、分镜、AI生图Prompt。目标市场：**欧美竖屏短剧**（唯一）。
 > **宿主无关**：本技能不绑定任何 agent 框架，唯一外部依赖 = 文件系统 + python3 + git；所有强制检查收敛在 `tools/validate_ep.py`，任何 LLM/人都能执行同一套流程。
+> **v5.6**: 一致性修复+验证器补漏+索引瘦身 — Premise"4种白名单"残留清理(novel-adaptation/scoring/patterns 统一指向 pitfalls 判据制)，continuity 更新规则收敛核心三项(删12项旧清单)，盲审白名单补 outline 分集梗概，删增量 delta 悬空方案，validate_ep 补对白≤12词/总分行缺失告警/--all 完整性模式(production 伪代码退役)，SKILL.md 与 quickstart 去重(速查单源化)
 > **v5.5**: 执行器落地（借鉴 agent 工程思想，宿主无关实现）— 新增 tools/validate_ep.py 每集验证器(机械硬规则一条命令全查,FAIL门禁)，盲审硬规则(独立上下文+输入白名单,根治自评膨胀)，git检查点(每集定稿一commit,回退/差异/恢复退役手工方案)，总分行机器可读约定+膨胀趋势自动检测，内嵌伪代码脚本全部退役指向工具
 > **v5.4**: 评分与知识面更新 — 权重表21维(新增角色魅力/代入感,广告素材潜力全类型提8,声音改音爆点标注)，Beat Engine按功能不按秒表，Premise扩8种示例(判据=同框即张力)，转译表补6套路(Groveling hero/重生/契约婚姻/替身/离婚开局/Fated mates)，ai-tools更新2026-07实况+核验日期机制，依赖图补visual_continuity+FAIL级联+回退补视觉，索引去重(激活表/目录树/decisions-log单源化)，TASK.md格式契约，⚓两级契约
 > **v5.3**: 商业参数落地 — 付费墙改paywall_ep参数化(默认EP-08,删3-7-21)，总集数商业规格50-80(默认60)，ep_duration参数化(默认90s)，对白英文直写≤12词，开场统一3秒，伏笔逾期扣分收编进评分表，continuity每集必更核心三项，删运镜种类下限
@@ -28,103 +29,32 @@ metadata:
 > AI 按阶段按需加载，避免一次性读取全部内容。
 > **速查**：先读 [`parts/quickstart.md`](parts/quickstart.md)（一页纸，告诉你每个阶段读哪些文件）
 
-| 文件 | 行数 | 内容 | 何时读取 |
-|------|------|------|---------|
-| [`parts/quickstart.md`](parts/quickstart.md) | ~93 | 一页纸速查卡：每阶段读哪些文件 + 核心规则速记 | **每次新session首先读取** |
-| [`parts/novel-adaptation.md`](parts/novel-adaptation.md) | ~143 | 阶段0：原著分析+支线取舍+压缩公式+中式→欧美转译+adaptation-map | **小说/Idea输入时必读**（阶段0） |
-| [`parts/pitfalls.md`](parts/pitfalls.md) | ~153 | 执行纪律+硬规则+Beat Engine+Premise+DI+对白+炫技防控 | 项目开始前必读；批量任务前复习 |
-| [`parts/workflow.md`](parts/workflow.md) | ~317 | 阶段0-7工作流+类型DNA+大纲结构+关系动力学+骨架生成+链式批量+文件依赖图 | 每阶段开始前 |
-| [`parts/continuity.md`](parts/continuity.md) | ~323 | continuity格式+visual_continuity格式+伏笔状态机+付费墙+回退+增量方案 | 每集开始前/结束后；回退时 |
-| [`parts/reviewers.md`](parts/reviewers.md) | ~20 | 审核系统索引+快速路由 | 选审核文件时 |
-| [`parts/reviewers-scoring.md`](parts/reviewers-scoring.md) | ~360 | 欧美市场标准+类型权重表(唯一权重源)+三Aligner评分表+扣分规则+钩子等级+运镜分级 | 审核时；评分时 |
-| [`parts/reviewers-workflow.md`](parts/reviewers-workflow.md) | ~109 | 审核工作流+集间衔接+输出格式 | 写审核报告时 |
-| [`parts/reviewers-agents.md`](parts/reviewers-agents.md) | ~143 | 十视角Agent定义+观众旁白模式+激活策略 | 选观众旁白Agent时；关键集审核前 |
-| [`parts/reviewers-patterns.md`](parts/reviewers-patterns.md) | ~77 | 创作法则+审核通过关键要素+常见陷阱+实战教训 | 审核不通过时；项目开始前 |
-| [`parts/templates.md`](parts/templates.md) | ~143 | 剧本/分镜/Prompt模板（⚓格式契约）+时间预算+批量注意事项 | 写剧本/分镜/Prompts时 |
-| [`parts/reference-system.md`](parts/reference-system.md) | ~179 | 三文件架构+Prompt视觉资产强制注入规则 | 阶段3视觉资产；写Prompts时 |
-| [`parts/reference-impl.md`](parts/reference-impl.md) | ~138 | 角色/场景/道具Reference数据模型+帧级注入+时间匹配 | 实现细节需要时（按需） |
-| [`parts/ai-tools.md`](parts/ai-tools.md) | ~45 | AI工具限制速查表（Seedance/Dreamina/Midjourney） | AI生图/生视频前；选工具时 |
-| [`parts/revision-workflows.md`](parts/revision-workflows.md) | ~77 | 好莱坞剧本快速路径+导演修订更新+版本差异量化 | 输入为剧本时；收到修订版时 |
-| [`parts/production.md`](parts/production.md) | ~160 | 批量验证清单+工作台生成(generate_index/build_html)+交付 | 批量生成后；生成工作台时 |
-| [`parts/architecture.md`](parts/architecture.md) | ~49 | 核心问题+解决方案架构+竖屏视觉语法+目录结构 | 新项目启动时；架构决策时 |
-| [`parts/decisions-log.md`](parts/decisions-log.md) | ~8 | 决策指针 + RATIONALE 同步纪律（硬规则唯一出处在 pitfalls/scoring） | 调试/回溯决策原因时（按需） |
+| 文件 | 内容 | 何时读取 |
+|------|------|---------|
+| [`parts/quickstart.md`](parts/quickstart.md) | 一页纸速查卡：每阶段读哪些文件 + 核心规则速记 + 收尾三件事 | **每次新session首先读取** |
+| [`parts/novel-adaptation.md`](parts/novel-adaptation.md) | 阶段0：原著分析+支线取舍+压缩公式+中式→欧美转译+adaptation-map | **小说/Idea输入时必读**（阶段0） |
+| [`parts/pitfalls.md`](parts/pitfalls.md) | 执行纪律+硬规则+Beat Engine+Premise+DI+对白+炫技防控 | 项目开始前必读；批量任务前复习 |
+| [`parts/workflow.md`](parts/workflow.md) | 阶段0-7工作流+类型DNA+大纲结构+关系动力学+骨架生成+链式批量+文件依赖图 | 每阶段开始前 |
+| [`parts/continuity.md`](parts/continuity.md) | continuity格式+visual_continuity格式+伏笔状态机+付费墙+回退机制 | 每集开始前/结束后；回退时 |
+| [`parts/reviewers.md`](parts/reviewers.md) | 审核系统索引+快速路由 | 选审核文件时 |
+| [`parts/reviewers-scoring.md`](parts/reviewers-scoring.md) | 欧美市场标准+类型权重表(唯一权重源)+三Aligner评分表+扣分规则+钩子等级+运镜分级 | 审核时；评分时 |
+| [`parts/reviewers-workflow.md`](parts/reviewers-workflow.md) | 审核工作流+盲审硬规则+集间衔接+输出格式 | 写审核报告时 |
+| [`parts/reviewers-agents.md`](parts/reviewers-agents.md) | 十视角Agent定义+观众旁白模式+激活策略（唯一出处） | 选观众旁白Agent时；关键集审核前 |
+| [`parts/reviewers-patterns.md`](parts/reviewers-patterns.md) | 创作法则+审核通过关键要素+常见陷阱+实战教训 | 审核不通过时；项目开始前 |
+| [`parts/templates.md`](parts/templates.md) | 剧本/分镜/Prompt模板（⚓格式契约）+时间预算+批量注意事项 | 写剧本/分镜/Prompts时 |
+| [`parts/reference-system.md`](parts/reference-system.md) | 三文件架构+Prompt视觉资产强制注入规则 | 阶段3视觉资产；写Prompts时 |
+| [`parts/reference-impl.md`](parts/reference-impl.md) | 角色/场景/道具Reference数据模型+帧级注入+时间匹配 | 实现细节需要时（按需） |
+| [`parts/ai-tools.md`](parts/ai-tools.md) | AI工具限制速查表（Seedance/Dreamina/Midjourney） | AI生图/生视频前；选工具时 |
+| [`parts/revision-workflows.md`](parts/revision-workflows.md) | 好莱坞剧本快速路径+导演修订更新+版本差异量化 | 输入为剧本时；收到修订版时 |
+| [`parts/production.md`](parts/production.md) | 批量验证(validate_ep --all)+工作台生成(generate_index/build_html)+交付 | 批量生成后；生成工作台时 |
+| [`parts/architecture.md`](parts/architecture.md) | 核心问题+解决方案架构+竖屏视觉语法+目录结构 | 新项目启动时；架构决策时 |
+| [`parts/decisions-log.md`](parts/decisions-log.md) | 决策指针 + RATIONALE 同步纪律（硬规则唯一出处在 pitfalls/scoring） | 调试/回溯决策原因时（按需） |
 
 ---
 
 ## 快速开始
 
-> 💡 **新session第一步**：读 [`parts/quickstart.md`](parts/quickstart.md)（一页纸速查卡）
-
-### 新项目启动（按顺序读取）
-1. 读 `parts/quickstart.md` — 速查卡（**首先读**）
-2. 输入是小说/Idea → 读 `parts/novel-adaptation.md` 跑**阶段0**（改编规划+adaptation-map，人工确认）
-3. 读 `parts/pitfalls.md` — 硬规则+爆款原则（**必读**）
-4. 读 `parts/workflow.md` — 工作流+类型DNA+大纲结构
-5. 读 `parts/architecture.md` — 架构和目录结构
-6. 按阶段推进，每阶段开始前读对应文件（见上表）
-
-### 单集创作
-1. 读 `parts/continuity.md` → 读 `parts/templates.md` → 写剧本 → 跑**Aligner审核**（独立上下文盲审；关键集可选观众旁白）
-2. 写分镜 → 跑审核 → 写Prompts → 读 `parts/reference-system.md` 注入视觉资产 → 跑审核
-3. 收尾三件事：更新 continuity 核心三项 → `python3 tools/validate_ep.py EP-XX --project .`（FAIL不进下一集）→ `git commit -m "EP-XX: 定稿"`
-
-### 批量任务（分镜/Prompts）
-1. 读 `parts/pitfalls.md` 的批量执行纪律
-2. 读 `parts/ai-tools.md` 确认工具限制
-3. 输出执行计划 → 确认 → 执行 → 按 `parts/production.md` 验证文件完整性
-
-### 全剧审查
-1. 读 `parts/reviewers-scoring.md` + `parts/reviewers-workflow.md` + `parts/reviewers-patterns.md` 跑**全量审核**
-2. 读 `parts/continuity.md` 的回退机制处理问题
-
----
-
-## 工作流概览（阶段0-7）
-
-```
-阶段0: 小说改编（小说/Idea输入时）→ adaptation-map → 人工确认
-         ↓
-阶段1: 大纲（类型DNA+Premise自检）→ 阶段2: 人物（关系动力学）→ 阶段3: 视觉资产（全局，只跑一次）
-         ↓
-阶段4: 逐集剧本（串行，叙事连续性不可妥协）→ 人工确认定稿
-         ↓
-阶段5: 批量分镜（剧本定稿后，含Director's Treatment）→ 人工确认定稿
-         ↓
-阶段6: 批量Prompts（分镜定稿后）→ 人工确认定稿
-         ↓
-阶段7: 工作台生成
-```
-
-> 详细流程见 [`parts/workflow.md`](parts/workflow.md)
-
----
-
-## 核心机制速查
-
-| 机制 | 一句话 | 详见 |
-|------|--------|------|
-| **小说改编（阶段0）** | Premise自检一票否决+支线砍合留+三幕→Block映射+中式→欧美转译 | `parts/novel-adaptation.md` |
-| **叙事层/制作层分离** | 剧本串行（叙事连续性），分镜/Prompts批量（无叙事依赖） | `parts/workflow.md` |
-| **visual_continuity.md** | 每集分镜完成后记录视觉状态快照，下集分镜/Prompts生成前必读 | `parts/continuity.md` |
-| **类型DNA** | 项目类型核心套路+冲突升级模式+钩子偏好+禁忌模式，大纲阶段提取 | `parts/workflow.md` |
-| **AI炫技防控** | 爆款第一原则：每秒都有情绪；合规但无聊=不及格 | `parts/pitfalls.md` |
-| **Beat Engine** | 每集按Hook→Friction→Spike→Button四段写 | `parts/pitfalls.md` |
-| **Premise-Driven Conflict** | 冲突内建于设定，判据=同框即张力（8种已验证示例） | `parts/pitfalls.md` |
-| **Dramatic Irony** | EP2-3建立观众信息优势，维持差距到付费墙后 | `parts/pitfalls.md` |
-| **对白=行动** | 每句推进冲突或压力下揭示角色，Subtext>Text | `parts/pitfalls.md` |
-| **🟡运镜收紧** | 🟡≤2个/集+必须写理由，🟢可靠/🟡有限/🔴赌博三级 | `parts/reviewers-scoring.md` |
-| **钩子简单性** | 能用单一的不用复合，能用低级的不用高级，复合是高潮集特权 | `parts/reviewers-scoring.md` |
-| **continuity精简** | 生成时只读3项核心（Last Cliffhanger+到期伏笔+角色状态） | `parts/workflow.md` |
-| **付费墙建模** | paywall_ep参数化Block分层（默认EP-08首付）+免费/付费集策略差异 | `parts/continuity.md` |
-| **Reference体系** | [ref: C-XX/S-XX/P-XX] 三重引用，改一处全局生效 | `parts/reference-system.md` |
-| **类型权重表** | 唯一权重真相源，6类型×21维度，每列合计100 | `parts/reviewers-scoring.md` |
-| **导演覆盖** | Green/Yellow/Red三色判定+导演override机制 | `parts/reviewers-scoring.md` |
-| **审核系统** | Aligner独立评分（≥80 PASS）+关键集可选观众旁白（Agent不打分） | `parts/reviewers-workflow.md` |
-| **竖屏视觉语法** | 纵向视线引导+画外空间叙事+特写/近景≥50% | `parts/architecture.md` |
-| **格式契约** | 剧本/分镜/Prompt的⚓锚点标题与解析器正则逐一对应，不可改 | `parts/templates.md` |
-| **每集验证器** | 机械硬规则全部收敛为一条命令：`tools/validate_ep.py EP-XX`，FAIL不进下一集 | `tools/validate_ep.py` |
-| **盲审** | Aligner评分必须独立上下文（子代理/新会话皆可），输入白名单隔离创作过程 | `parts/reviewers-workflow.md` |
-| **git检查点** | 每集定稿一个commit；回退/差异/中断恢复全靠git | `parts/pitfalls.md` §1.5 |
+> 💡 **新session第一步**：读 [`parts/quickstart.md`](parts/quickstart.md)——各场景读哪些文件、新项目启动顺序、核心规则速记、收尾三件事，全部在那一页（**唯一速查出处**，本文件不复述）。
 
 ---
 
@@ -181,3 +111,4 @@ project/
 | v5.3 | 商业参数落地：paywall_ep参数化(删3-7-21)+集数50-80+ep_duration参数化+对白英文直写+开场3秒统一+伏笔扣分收编评分表+continuity每集必更核心三项 | 双视角审查（架构师+短剧导演）：付费墙EP4/EP8两套矛盾、3-7-21查无行业依据、集数撑不起投流、中文对白→翻译产生Chinglish |
 | v5.4 | 评分21维(角色魅力+广告素材8分+音爆点)+Beat按功能+Premise 8示例+转译表补6套路+ai-tools 2026-07+依赖图/FAIL级联/回退补视觉+索引单源化+TASK契约+⚓两级 | 双视角审查P1批：评分体系放过"结构满分角色无魅力"、工具表过时一代、加载路径缺写作端词汇表、状态文件无格式契约 |
 | v5.5 | 执行器落地(宿主无关)：validate_ep.py每集验证器+FAIL门禁、盲审(独立上下文+输入白名单)、git检查点、总分行约定+膨胀自动检测、内嵌脚本退役 | 借鉴 agent 工程思想：确定性规则应由执行器强制而非模型自觉；审稿人与写手共享上下文是评分膨胀根因 |
+| v5.6 | 一致性修复+验证器补漏+瘦身：Premise"4种"残留清理、continuity更新规则收敛核心三项、盲审白名单补分集梗概、删增量delta悬空方案、validate_ep补≤12词/总分行告警/--all、SKILL与quickstart去重 | 全量审查：v5.3/5.4规则更新未打穿全部文件（复述漂移实例）；"机械规则全收敛"承诺有漏项 |

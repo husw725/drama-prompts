@@ -8,23 +8,15 @@
 
 > 一次性生成 10+ 集后、进入工作台阶段前必须执行，否则会出现文件缺失（如 EP-20 prompts 漏写）。
 
-**生成后必做验证：**
+**生成后必做验证**（唯一实现在工具里，不再内嵌脚本）：
 
-```python
-import os
-base = "/path/to/project"
-for i in range(1, TOTAL_EPS + 1):
-    ep = f"EP-{i:02d}"
-    for subdir in ["script", "storyboard", "prompts"]:
-        fp = f"{base}/{subdir}/{ep}.md"
-        if not os.path.exists(fp):
-            print(f"MISSING: {subdir}/{ep}.md")
-        elif os.path.getsize(fp) < 500:
-            print(f"SUSPECT: {subdir}/{ep}.md（<500 bytes，可能为空）")
+```bash
+python3 <技能目录>/tools/validate_ep.py --all --project .
+# 以 script/ 最大集为基准查三件套：缺失=FAIL，<500 bytes=WARN(疑似空文件)
 ```
 
 **缺失处理流程：**
-1. 运行验证脚本（见上）
+1. 运行 `validate_ep.py --all`（见上）
 2. 发现缺失 → 立即读取对应 script/EP-XX.md
 3. 主模型直接手写补齐 storyboard 和 prompts（不派子代理，速度更快）
 4. 重新验证确认全部存在 → 才能进入工作台阶段

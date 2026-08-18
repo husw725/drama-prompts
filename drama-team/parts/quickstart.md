@@ -43,6 +43,14 @@
 
 ---
 
+## 三个常用场景
+
+- **新项目启动（按顺序）**：本速查卡 → 小说/Idea输入先跑阶段0（`novel-adaptation.md`）→ `pitfalls.md`（必读）→ `workflow.md` → `architecture.md` → 按阶段推进
+- **批量任务（分镜/Prompts）**：`pitfalls.md` 批量纪律 → `ai-tools.md` 工具限制 → 输出执行计划待确认 → 执行 → `validate_ep.py --all` 查文件完整性（`production.md`）
+- **全剧审查**：`reviewers-scoring.md` + `reviewers-workflow.md` + `reviewers-patterns.md` 跑全量审核；问题处理走 `continuity.md` 回退机制
+
+---
+
 ## 核心规则速记
 
 ### Beat Engine（每集必遵）

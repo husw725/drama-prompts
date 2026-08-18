@@ -17,7 +17,7 @@
 | **情绪表达** | 爆炸式（"I want you to suffer!"），克制内心戏不适用 |
 | **节奏容忍** | 极低：5秒没爽点观众走人 |
 | **Beat Engine** | Hook=引爆（3秒定帧），Friction=可拍摄冲突，Spike=静音测试，Button=问题前切断 |
-| **Premise 要求** | 必须内建冲突（Enemies-to-lovers / Forbidden proximity / Power imbalance / Arranged circumstance） |
+| **Premise 要求** | 必须内建冲突，判据=同框即张力（8种已验证示例见 `pitfalls.md#三`，示例表不是白名单） |
 | **Dramatic Irony** | EP2-3建立观众信息优势，维持差距到付费墙后 |
 | **文化雷区** | ①GLBT+未成年+永久身体改变组合 ②宗教隐喻过重 ③种族刻板印象 ④美化奴隶制/殖民 ⑤过度血腥无意义 |
 | **本地化** | 台词零 Chinglish；行为动机符合欧美文化背景；女主必须有自主选择权（反恋爱脑/反无深度雌竞） |
